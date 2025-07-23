@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>To-Do List App</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Advanced To-Do List App</title>
+    <!-- Tailwind CSS CDN for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter Font -->
+    <!-- Inter Font for modern typography -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Basic body styling for font and background */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6; /* Light gray background */
@@ -28,26 +29,41 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
+        /* Style for contenteditable elements when focused (for task editing) */
+        [contenteditable]:focus {
+            outline: 2px solid #3b82f6; /* Blue ring on focus */
+            border-radius: 0.25rem; /* Rounded corners */
+            padding: 0.25rem;
+        }
+        /* Visual feedback for drag and drop operations */
+        .dragging {
+            opacity: 0.5; /* Make the dragged item semi-transparent */
+            border: 2px dashed #60a5fa; /* Add a dashed border */
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
-    <!-- Login/Registration Container -->
+    <!-- Authentication Container: Shown when user is not logged in -->
     <div id="authContainer" class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md hidden">
         <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Welcome</h1>
         <p class="text-gray-600 mb-4 text-center">Sign in or create an account to manage your tasks.</p>
 
+        <!-- Email Input Field -->
         <div class="mb-4">
             <label for="emailInput" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
             <input type="email" id="emailInput" placeholder="your@example.com"
-                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+                   class="w-full p-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 shadow-sm"> <!-- Modified: removed border, added bg-gray-100 and shadow-sm -->
         </div>
+        <!-- Password Input Field -->
         <div class="mb-6">
             <label for="passwordInput" class="block text-gray-700 text-sm font-bold mb-2">Password:</label>
             <input type="password" id="passwordInput" placeholder="********"
-                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+                   class="w-full p-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 shadow-sm"> <!-- Modified: removed border, added bg-gray-100 and shadow-sm -->
         </div>
 
+        <!-- Authentication Buttons -->
         <div class="flex flex-col space-y-3">
+            <p class="text-center text-sm text-blue-600 font-medium mb-2">First Time User? Please Press "Sign Up"!</p>
             <button id="loginBtn"
                     class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md">
                 Log In
@@ -56,45 +72,89 @@
                     class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md">
                 Sign Up
             </button>
-		<p class="text-center text-sm text-blue-600 font-medium mb-2">First Time User? Please Press "Sign Up"!</p>
+            <button id="forgotPasswordBtn"
+                    class="text-blue-600 hover:text-blue-800 text-sm mt-2 transition duration-300 ease-in-out">
+                Forgot Password?
+            </button>
         </div>
     </div>
 
-    <!-- To-Do List Container -->
+    <!-- To-Do List Container: Shown when user is logged in -->
     <div id="todoContainer" class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md hidden">
         <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">My To-Do List</h1>
 
-        <!-- User ID Display -->
-        <div id="userIdDisplay" class="text-sm text-gray-600 mb-4 text-center break-words">
-            Loading user...
+        <!-- User ID and Email Verification Status Display -->
+        <div class="mb-4 text-center">
+            <div id="userIdDisplay" class="text-sm text-gray-600 mb-1 break-words">
+                Loading user...
+            </div>
+            <!-- Email verification message, hidden by default -->
+            <div id="emailVerificationMessage" class="text-sm text-red-500 font-semibold mb-2 hidden">
+                Email not verified. <button id="resendVerificationBtn" class="text-blue-600 hover:text-blue-800 underline">Resend</button>
+            </div>
         </div>
 
-        <div class="flex mb-6">
+        <!-- Task Input Section: Includes task text, due date, category, and action buttons -->
+        <div class="flex flex-wrap items-center gap-2 mb-6">
             <input type="text" id="taskInput" placeholder="Add a new task..."
-                   class="flex-grow p-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+                   class="flex-grow p-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 shadow-sm"> <!-- Modified: removed border, added bg-gray-100 and shadow-sm -->
+            <input type="date" id="dueDateInput"
+                   class="p-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 shadow-sm"> <!-- Modified: removed border, added bg-gray-100 and shadow-sm -->
+            <input type="time" id="dueTimeInput"
+                   class="p-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 shadow-sm"> <!-- Modified: removed border, added bg-gray-100 and shadow-sm -->
+            <input type="text" id="categoryInput" placeholder="Category (e.g., Work)"
+                   class="p-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 w-full sm:w-auto shadow-sm"> <!-- Modified: removed border, added bg-gray-100 and shadow-sm -->
+        </div>
+        <div class="flex flex-wrap gap-2 mb-6">
             <button id="addTaskBtn"
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-5 rounded-r-lg transition duration-300 ease-in-out shadow-md">
-                Add
+                    class="flex-grow bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md">
+                Add Task
             </button>
+            <!-- AI Elaborate Task button removed as requested -->
         </div>
 
+        <!-- Filter and Sort Controls -->
+        <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+            <div class="flex items-center w-full sm:w-auto justify-between sm:justify-start">
+                <label for="filterSelect" class="text-gray-700 mr-2">Show:</label>
+                <select id="filterSelect" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="all">All</option>
+                    <option value="active">Active</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+            <div class="flex items-center w-full sm:w-auto justify-between sm:justify-start">
+                <label for="sortSelect" class="text-gray-700 mr-2">Sort by:</label>
+                <select id="sortSelect" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="timestamp_asc">Oldest First</option>
+                    <option value="timestamp_desc">Newest First</option>
+                    <option value="dueDate_asc">Due Date (Asc)</option>
+                    <option value="dueDate_desc">Due Date (Desc)</option>
+                    <option value="text_asc">Alphabetical (A-Z)</option>
+                    <option value="text_desc">Alphabetical (Z-A)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Task List: Where tasks are dynamically rendered -->
         <ul id="taskList" class="space-y-3">
-            <!-- Tasks will be dynamically added here -->
+            <!-- Tasks will be dynamically added here by JavaScript -->
         </ul>
 
-        <!-- Loading Indicator -->
+        <!-- Loading Indicator for tasks -->
         <div id="loadingIndicator" class="text-center text-gray-500 mt-4 hidden">
             Loading tasks...
         </div>
 
+        <!-- Logout Button -->
         <button id="logoutBtn"
                 class="mt-6 w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md">
             Log Out
         </button>
     </div>
 
-    <!-- Message Box for alerts -->
-    <div id="messageBox" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+    <!-- Custom Message Box for alerts and confirmations -->
+    <div id="messageBox" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
         <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
             <p id="messageText" class="text-lg font-semibold text-gray-800 mb-4"></p>
             <button id="messageBoxCloseBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg">
@@ -104,14 +164,23 @@
     </div>
 
     <script type="module">
-        // Firebase imports - Updated to v12.0.0 based on your provided config
+        // Firebase SDK Imports:
+        // initializeApp: To initialize the Firebase app.
+        // getAuth: To get the authentication service instance.
+        // createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendEmailVerification, sendPasswordResetEmail:
+        //    Authentication methods for user management.
+        // getFirestore: To get the Firestore database instance.
+        // collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, getDocs:
+        //    Firestore methods for database operations (CRUD, real-time listening, querying).
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
         import {
             getAuth,
             createUserWithEmailAndPassword,
             signInWithEmailAndPassword,
             onAuthStateChanged,
-            signOut
+            signOut,
+            sendEmailVerification,
+            sendPasswordResetEmail
         } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
         import {
             getFirestore,
@@ -121,10 +190,13 @@
             deleteDoc,
             doc,
             onSnapshot,
-            query
+            query,
+            getDocs
         } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
+        // Your web app's Firebase configuration.
+        // REPLACE THESE VALUES with your actual Firebase project's configuration
+        // obtained from the Firebase Console -> Project settings -> Your apps -> Web app setup.
         const firebaseConfig = {
             apiKey: "AIzaSyB7ZesRhCUfElvv58AyzSQjXcP_dqbFH_4",
             authDomain: "my-to-do-app-cd314.firebaseapp.com",
@@ -135,77 +207,126 @@
             measurementId: "G-S0VBJXLSDX"
         };
 
-        // Manually define appId using the projectId from your firebaseConfig
+        // Define appId using the projectId from your firebaseConfig.
+        // This is used to construct the Firestore path for user-specific data:
+        // `artifacts/${appId}/users/${userId}/tasks`
         const appId = firebaseConfig.projectId;
 
-        // Initialize Firebase
+        // Firebase Service Instances (will be initialized later)
         let app;
         let db;
         let auth;
-        let userId = null;
-        let isAuthReady = false; // Flag to indicate if authentication is ready
-        let unsubscribeFromTasks = null; // To store the unsubscribe function for the Firestore listener
+        let currentUser = null; // Stores the Firebase User object for current authenticated user
+        let userId = null; // Stores the UID of the current authenticated user
+        let isAuthReady = false; // Flag to indicate if Firebase Authentication is fully initialized and ready
+        let unsubscribeFromTasks = null; // Stores the unsubscribe function for the Firestore real-time listener
 
-        // DOM elements for Auth
+        // Global state variables for filtering and sorting tasks
+        let currentFilter = 'all'; // Can be 'all', 'active', or 'completed'
+        let currentSort = 'timestamp_asc'; // Defines the current sorting order for tasks
+
+        // DOM Element References:
+        // Authentication Section
         const authContainer = document.getElementById('authContainer');
         const emailInput = document.getElementById('emailInput');
         const passwordInput = document.getElementById('passwordInput');
         const loginBtn = document.getElementById('loginBtn');
         const signupBtn = document.getElementById('signupBtn');
+        const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
 
-        // DOM elements for To-Do List
+        // To-Do List Section
         const todoContainer = document.getElementById('todoContainer');
         const taskInput = document.getElementById('taskInput');
+        const dueDateInput = document.getElementById('dueDateInput');
+        const dueTimeInput = document.getElementById('dueTimeInput');
+        const categoryInput = document.getElementById('categoryInput');
         const addTaskBtn = document.getElementById('addTaskBtn');
+        // Removed: elaborateTaskBtn and elaborateLoadingSpinner
         const taskList = document.getElementById('taskList');
         const userIdDisplay = document.getElementById('userIdDisplay');
+        const emailVerificationMessage = document.getElementById('emailVerificationMessage');
+        const resendVerificationBtn = document.getElementById('resendVerificationBtn');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const logoutBtn = document.getElementById('logoutBtn');
+        const filterSelect = document.getElementById('filterSelect');
+        const sortSelect = document.getElementById('sortSelect');
 
-        // DOM elements for Message Box
+        // Message Box Elements
         const messageBox = document.getElementById('messageBox');
         const messageText = document.getElementById('messageText');
         const messageBoxCloseBtn = document.getElementById('messageBoxCloseBtn');
 
-        // Function to show custom message box
+        // Drag and drop variables
+        let draggedItem = null; // Stores the HTML element currently being dragged
+
+        /**
+         * @function showMessageBox
+         * @description Displays a custom modal message box to the user.
+         * This function replaces browser's native `alert()` for better UI control.
+         * @param {string} message - The text message to be displayed inside the modal.
+         * @returns {void}
+         */
         function showMessageBox(message) {
             messageText.textContent = message;
-            messageBox.classList.remove('hidden');
+            messageBox.classList.remove('hidden'); // Make the message box visible
         }
 
-        // Close message box
+        /**
+         * @description Event listener for the close button of the message box.
+         * Hides the message box when clicked.
+         * @returns {void}
+         */
         messageBoxCloseBtn.addEventListener('click', () => {
-            messageBox.classList.add('hidden');
+            messageBox.classList.add('hidden'); // Hide the message box
         });
 
-        // Initialize Firebase and set up authentication listener
+        /**
+         * @function initializeFirebase
+         * @description Initializes the Firebase application with the provided configuration.
+         * Sets up the Firestore database and Firebase Authentication services.
+         * Crucially, it establishes an `onAuthStateChanged` listener to react to user login/logout
+         * states, managing UI visibility and email verification status.
+         * @returns {Promise<void>}
+         */
         async function initializeFirebase() {
             try {
+                // Initialize Firebase app with your project's configuration
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
 
-                // Listen for authentication state changes
+                // Set up a listener for authentication state changes.
+                // This function runs whenever the user signs in, signs out, or their auth state changes.
                 onAuthStateChanged(auth, (user) => {
+                    currentUser = user; // Store the current Firebase User object globally
                     if (user) {
                         // User is signed in
-                        userId = user.uid;
-                        userIdDisplay.textContent = `User ID: ${userId}`;
-                        isAuthReady = true;
-                        authContainer.classList.add('hidden');
-                        todoContainer.classList.remove('hidden');
+                        userId = user.uid; // Set the user's UID
+                        userIdDisplay.textContent = `User ID: ${userId}`; // Display UID in UI
+                        isAuthReady = true; // Mark authentication as ready
+
+                        // Check and display email verification status
+                        if (!user.emailVerified) {
+                            emailVerificationMessage.classList.remove('hidden'); // Show verification message
+                        } else {
+                            emailVerificationMessage.classList.add('hidden'); // Hide verification message
+                        }
+
+                        authContainer.classList.add('hidden'); // Hide the authentication container
+                        todoContainer.classList.remove('hidden'); // Show the To-Do list container
                         console.log("User signed in:", userId);
-                        setupRealtimeListener(); // Start listening for tasks
+                        setupRealtimeListener(); // Start listening for tasks for the logged-in user
                     } else {
                         // User is signed out
-                        userId = null;
-                        isAuthReady = false;
-                        authContainer.classList.remove('hidden');
-                        todoContainer.classList.add('hidden');
-                        taskList.innerHTML = ''; // Clear tasks when logged out
-                        userIdDisplay.textContent = 'Please log in.';
+                        userId = null; // Clear user ID
+                        isAuthReady = false; // Mark authentication as not ready
+                        authContainer.classList.remove('hidden'); // Show the authentication container
+                        todoContainer.classList.add('hidden'); // Hide the To-Do list container
+                        taskList.innerHTML = ''; // Clear tasks from the UI
+                        userIdDisplay.textContent = 'Please log in.'; // Update user ID display
+                        emailVerificationMessage.classList.add('hidden'); // Hide verification message
                         console.log("User signed out.");
-                        // If there's an active listener, unsubscribe it
+                        // If there's an active Firestore listener, unsubscribe it to stop real-time updates
                         if (unsubscribeFromTasks) {
                             unsubscribeFromTasks();
                             unsubscribeFromTasks = null;
@@ -218,35 +339,49 @@
             }
         }
 
-        // Function to set up real-time listener for tasks
+        /**
+         * @function setupRealtimeListener
+         * @description Sets up a real-time listener for tasks in Firestore for the current user.
+         * This listener automatically updates the UI whenever there are changes in the database.
+         * It fetches tasks, applies the current filter and sort settings, and then renders them.
+         * It also ensures only one listener is active at a time by unsubscribing from previous ones.
+         * @returns {void}
+         */
         function setupRealtimeListener() {
             if (!db || !userId || !isAuthReady) {
                 console.log("Firestore not ready or user not authenticated. Skipping listener setup.");
                 return;
             }
 
-            loadingIndicator.classList.remove('hidden');
+            loadingIndicator.classList.remove('hidden'); // Show loading indicator
             const tasksCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/tasks`);
-            const q = query(tasksCollectionRef);
+            const q = query(tasksCollectionRef); // Create a query to the user's tasks collection
 
-            // Unsubscribe from previous listener if it exists to prevent multiple listeners
+            // Unsubscribe from any previously active listener to prevent duplicate data rendering
             if (unsubscribeFromTasks) {
                 unsubscribeFromTasks();
             }
 
+            // Set up the new real-time listener using onSnapshot
             unsubscribeFromTasks = onSnapshot(q, (snapshot) => {
-                taskList.innerHTML = ''; // Clear current list
-                const tasks = [];
+                let tasks = [];
                 snapshot.forEach(doc => {
                     const taskData = doc.data();
                     tasks.push({ id: doc.id, ...taskData });
                 });
 
-                // Sort tasks by timestamp in memory
-                tasks.sort((a, b) => (a.timestamp ? a.timestamp.toDate() : 0) - (b.timestamp ? b.timestamp.toDate() : 0));
+                // Apply filtering based on the `currentFilter` state
+                tasks = filterTasks(tasks, currentFilter);
 
-                tasks.forEach(task => displayTask(task));
-                loadingIndicator.classList.add('hidden');
+                // Apply sorting based on the `currentSort` state
+                // Note: Firestore's orderBy is avoided to prevent requiring complex indexes.
+                // Sorting is done client-side in memory.
+                tasks = sortTasks(tasks, currentSort);
+
+                // Re-render tasks in the UI
+                taskList.innerHTML = ''; // Clear all existing tasks from the list
+                tasks.forEach(task => displayTask(task)); // Render each task
+                loadingIndicator.classList.add('hidden'); // Hide loading indicator
             }, (error) => {
                 console.error("Error fetching real-time tasks:", error);
                 showMessageBox("Error loading tasks. Please refresh.");
@@ -254,26 +389,247 @@
             });
         }
 
-        // Function to display a single task in the UI
+        /**
+         * @function filterTasks
+         * @description Filters a list of tasks based on the specified filter type.
+         * @param {Array<Object>} tasks - The array of task objects to filter. Each task object
+         * is expected to have a `completed` boolean property.
+         * @param {string} filter - The filter type. Valid values are:
+         * - 'all': Returns all tasks.
+         * - 'active': Returns tasks where `completed` is false.
+         * - 'completed': Returns tasks where `completed` is true.
+         * @returns {Array<Object>} The filtered array of task objects.
+         */
+        function filterTasks(tasks, filter) {
+            switch (filter) {
+                case 'active':
+                    return tasks.filter(task => !task.completed);
+                case 'completed':
+                    return tasks.filter(task => task.completed);
+                case 'all':
+                default:
+                    return tasks;
+            }
+        }
+
+        /**
+         * @function sortTasks
+         * @description Sorts a list of tasks based on the specified sort order.
+         * This function implements client-side sorting to avoid Firestore index issues
+         * with `orderBy` on multiple fields.
+         * @param {Array<Object>} tasks - The array of task objects to sort.
+         * @param {string} sortOrder - The sort order. Valid values are:
+         * - 'timestamp_asc': Sorts by creation timestamp (oldest first).
+         * - 'timestamp_desc': Sorts by creation timestamp (newest first).
+         * - 'dueDate_asc': Sorts by due date ascending. Tasks without due dates appear at the end.
+         * - 'dueDate_desc': Sorts by due date descending. Tasks without due dates appear at the beginning.
+         * - 'text_asc': Sorts by task text alphabetically (A-Z).
+         * - 'text_desc': Sorts by task text alphabetically (Z-A).
+         * @returns {Array<Object>} The sorted array of task objects.
+         */
+        function sortTasks(tasks, sortOrder) {
+            return tasks.sort((a, b) => {
+                // Helper to create a full Date object from date and optional time strings
+                const createDateTime = (dateStr, timeStr) => {
+                    if (!dateStr) return null; // No date, cannot create full datetime
+                    // If timeStr is not provided, default to '00:00' for consistent date parsing
+                    const fullDateTimeStr = `${dateStr}T${timeStr || '00:00'}:00`;
+                    return new Date(fullDateTimeStr);
+                };
+
+                switch (sortOrder) {
+                    case 'timestamp_asc':
+                        // Sort by creation timestamp ascending (oldest first)
+                        // Converts Firestore Timestamp objects to Date objects for comparison.
+                        // Handles cases where timestamp might be missing by treating it as 0.
+                        return (a.timestamp ? a.timestamp.toDate() : 0) - (b.timestamp ? b.timestamp.toDate() : 0);
+                    case 'timestamp_desc':
+                        // Sort by creation timestamp descending (newest first)
+                        return (b.timestamp ? b.timestamp.toDate() : 0) - (a.timestamp ? a.timestamp.toDate() : 0);
+                    case 'dueDate_asc':
+                        // Sort by due date (and time) ascending. Tasks without due dates are pushed to the end
+                        // by assigning a very late date for comparison.
+                        const dateA = createDateTime(a.dueDate, a.dueTime) || new Date('9999-12-31T23:59:59');
+                        const dateB = createDateTime(b.dueDate, b.dueTime) || new Date('9999-12-31T23:59:59');
+                        return dateA.getTime() - dateB.getTime();
+                    case 'dueDate_desc':
+                        // Sort by due date (and time) descending. Tasks without due dates are pushed to the beginning
+                        // by assigning a very early date for comparison.
+                        const dateADesc = createDateTime(a.dueDate, a.dueTime) || new Date('0000-01-01T00:00:00');
+                        const dateBDesc = createDateTime(b.dueDate, b.dueTime) || new Date('0000-01-01T00:00:00');
+                        return dateBDesc.getTime() - dateADesc.getTime();
+                    case 'text_asc':
+                        // Sort by task text alphabetically ascending using localeCompare for proper string comparison
+                        return a.text.localeCompare(b.text);
+                    case 'text_desc':
+                        // Sort by task text alphabetically descending
+                        return b.text.localeCompare(a.text);
+                    default:
+                        return 0; // No specific sorting applied
+                }
+            });
+        }
+
+        /**
+         * @function displayTask
+         * @description Creates and appends a single task item as an `<li>` element to the `taskList` in the UI.
+         * This function is responsible for rendering all task details and interactive elements.
+         * It includes:
+         * - Task text (editable on double-click)
+         * - Completion status (line-through)
+         * - Due date display with overdue/due today styling
+         * - Category/tag display
+         * - Delete button
+         * - Drag-and-drop functionality for reordering tasks.
+         * @param {Object} task - The task object containing id, text, completed, dueDate, category, etc.
+         * @returns {void}
+         */
         function displayTask(task) {
             const listItem = document.createElement('li');
-            listItem.dataset.id = task.id;
-            listItem.classList.add('flex', 'items-center', 'justify-between', 'bg-gray-50', 'p-3', 'rounded-lg', 'shadow-sm', 'transition', 'duration-200', 'ease-in-out');
+            listItem.dataset.id = task.id; // Store Firestore document ID on the element
+            listItem.draggable = true; // Enable HTML5 drag-and-drop for this list item
+            listItem.classList.add('flex', 'flex-col', 'sm:flex-row', 'items-start', 'sm:items-center', 'justify-between', 'bg-gray-50', 'p-3', 'rounded-lg', 'shadow-sm', 'transition', 'duration-200', 'ease-in-out', 'group');
 
+            // --- Drag and Drop Event Listeners ---
+            // Triggered when dragging of the item starts
+            listItem.addEventListener('dragstart', (e) => {
+                draggedItem = listItem; // Store reference to the element being dragged
+                e.dataTransfer.effectAllowed = 'move'; // Indicate that the item can be moved
+                // Add 'dragging' class after a slight delay to allow browser to capture initial drag image
+                setTimeout(() => listItem.classList.add('dragging'), 0);
+            });
+
+            // Triggered when a dragged item is moved over this list item
+            listItem.addEventListener('dragover', (e) => {
+                e.preventDefault(); // Crucial: Prevents default browser behavior (e.g., preventing drop)
+                const boundingBox = listItem.getBoundingClientRect();
+                const offset = boundingBox.y + (boundingBox.height / 2); // Calculate the vertical midpoint of the list item
+
+                // Provide visual feedback (top/bottom border) based on where the dragged item is over the target
+                if (e.clientY < offset) {
+                    // If cursor is in the top half, indicate drop above
+                    listItem.style.borderTop = '2px solid #60a5fa';
+                    listItem.style.borderBottom = 'none';
+                } else {
+                    // If cursor is in the bottom half, indicate drop below
+                    listItem.style.borderBottom = '2px solid #60a5fa';
+                    listItem.style.borderTop = 'none';
+                }
+            });
+
+            // Triggered when a dragged item leaves this list item
+            listItem.addEventListener('dragleave', () => {
+                // Remove visual feedback when dragged item leaves
+                listItem.style.borderTop = 'none';
+                listItem.style.borderBottom = 'none';
+            });
+
+            // Triggered when a dragged item is dropped on this list item
+            listItem.addEventListener('drop', (e) => {
+                e.preventDefault(); // Prevent default drop behavior
+                listItem.style.borderTop = 'none';
+                listItem.style.borderBottom = 'none'; // Clear visual feedback
+
+                // If a valid item is being dragged and it's not the same item being dropped on itself
+                if (draggedItem && draggedItem !== listItem) {
+                    const boundingBox = listItem.getBoundingClientRect();
+                    const offset = boundingBox.y + (boundingBox.height / 2);
+
+                    // Insert the dragged item before or after the target item based on drop position
+                    if (e.clientY < offset) {
+                        taskList.insertBefore(draggedItem, listItem);
+                    } else {
+                        taskList.insertBefore(draggedItem, listItem.nextSibling);
+                    }
+                    updateTaskOrder(); // Call function to update the order in Firestore
+                }
+            });
+
+            // Triggered when the drag operation ends (whether successful drop or not)
+            listItem.addEventListener('dragend', () => {
+                draggedItem.classList.remove('dragging'); // Remove dragging visual class
+                draggedItem = null; // Clear the reference to the dragged item
+                // Clean up any lingering borders on all list items (important if drag ends outside a target)
+                Array.from(taskList.children).forEach(item => {
+                    item.style.borderTop = 'none';
+                    item.style.borderBottom = 'none';
+                });
+            });
+
+
+            // Main content div for task text and meta info (due date, category)
+            const mainContentDiv = document.createElement('div');
+            mainContentDiv.classList.add('flex-grow', 'flex', 'flex-col', 'sm:flex-row', 'sm:items-center', 'gap-1', 'sm:gap-3', 'mb-2', 'sm:mb-0');
+
+            // Task Text Span: Displays the task description
             const taskTextSpan = document.createElement('span');
             taskTextSpan.textContent = task.text;
-            taskTextSpan.classList.add('flex-grow', 'text-gray-700', 'text-lg', 'cursor-pointer');
+            taskTextSpan.classList.add('text-gray-700', 'text-lg', 'cursor-pointer', 'min-w-0', 'break-words');
+            taskTextSpan.contentEditable = true; // Make the text directly editable in the UI
+            taskTextSpan.spellcheck = false; // Disable browser spellcheck for this editable field
 
+            // Apply line-through style if task is completed
             if (task.completed) {
                 taskTextSpan.classList.add('line-through', 'text-gray-500');
             }
 
-            // Toggle completion on click
+            // Event listeners for editing task text
+            // `blur` event: Triggered when the element loses focus (e.g., user clicks away)
+            taskTextSpan.addEventListener('blur', () => updateTaskText(task.id, taskTextSpan.textContent.trim()));
+            // `keypress` event: Triggered when a key is pressed while the element is focused
+            taskTextSpan.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // Prevent adding a new line in contenteditable
+                    taskTextSpan.blur(); // Programmatically trigger blur to save changes
+                }
+            });
+            // Toggle completion on click (still works on the span, even with contenteditable)
             taskTextSpan.addEventListener('click', () => toggleTaskCompletion(task.id, !task.completed));
 
-            const actionsDiv = document.createElement('div');
-            actionsDiv.classList.add('flex', 'space-x-2', 'ml-4');
 
+            // Meta Information Div: Contains due date and category
+            const metaInfoDiv = document.createElement('div');
+            metaInfoDiv.classList.add('flex', 'items-center', 'text-sm', 'text-gray-500', 'gap-2', 'flex-wrap');
+
+            // Display Due Date and Time if available
+            if (task.dueDate) {
+                const dueDateSpan = document.createElement('span');
+                // Combine date and time to create a full Date object for accurate comparison and display
+                const fullDueDate = new Date(`${task.dueDate}T${task.dueTime || '00:00'}:00`);
+                const today = new Date();
+                today.setHours(0,0,0,0); // Normalize today's date to midnight for accurate comparison
+
+                let dateClass = 'text-gray-500';
+                // Apply specific styling for tasks due today or overdue
+                if (fullDueDate.toDateString() === today.toDateString() && !task.completed) {
+                    dateClass = 'text-orange-600 font-semibold'; // Due today and not completed
+                } else if (fullDueDate < today && !task.completed) {
+                    dateClass = 'text-red-600 font-semibold'; // Overdue and not completed
+                }
+                dueDateSpan.classList.add(dateClass);
+                // Display both date and time
+                dueDateSpan.textContent = `Due: ${fullDueDate.toLocaleDateString()} ${task.dueTime ? fullDueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}`;
+                metaInfoDiv.appendChild(dueDateSpan);
+            }
+
+            // Display Category if available and not empty
+            if (task.category && task.category.trim() !== '') {
+                const categorySpan = document.createElement('span');
+                categorySpan.classList.add('bg-blue-100', 'text-blue-800', 'px-2', 'py-0.5', 'rounded-full', 'text-xs', 'font-medium');
+                categorySpan.textContent = task.category;
+                metaInfoDiv.appendChild(categorySpan);
+            }
+
+            // Append task text and meta info to the main content div
+            mainContentDiv.appendChild(taskTextSpan);
+            mainContentDiv.appendChild(metaInfoDiv);
+
+
+            // Actions Div: Contains buttons like delete
+            const actionsDiv = document.createElement('div');
+            actionsDiv.classList.add('flex', 'space-x-2', 'ml-0', 'sm:ml-4', 'flex-shrink-0'); // Adjust margin for responsiveness
+
+            // Delete Button
             const deleteBtn = document.createElement('button');
             deleteBtn.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500 hover:text-red-700 transition duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -282,47 +638,149 @@
             `;
             deleteBtn.classList.add('p-1', 'rounded-full', 'hover:bg-gray-200');
             deleteBtn.title = "Delete Task";
-            deleteBtn.addEventListener('click', () => deleteTask(task.id));
+            deleteBtn.addEventListener('click', () => deleteTask(task.id)); // Attach delete functionality
 
+            // Append elements to the list item and then to the task list
             actionsDiv.appendChild(deleteBtn);
-            listItem.appendChild(taskTextSpan);
+            listItem.appendChild(mainContentDiv);
             listItem.appendChild(actionsDiv);
             taskList.appendChild(listItem);
         }
 
-        // Function to add a new task to Firestore
-        async function addTaskToFirestore(text) {
+        /**
+         * @function updateTaskOrder
+         * @description Updates the 'order' field for all tasks in Firestore based on their current
+         * visual position in the UI's `taskList` after a drag-and-drop operation.
+         * This ensures the order persists across sessions. It uses a Firestore batch write
+         * for atomic and efficient updates of multiple documents.
+         * @returns {Promise<void>}
+         */
+        async function updateTaskOrder() {
+            // Ensure user is logged in before attempting to update Firestore
+            if (!db || !userId || !isAuthReady) {
+                showMessageBox("Please log in to reorder tasks.");
+                return;
+            }
+
+            const listItems = Array.from(taskList.children); // Get all current list items in their DOM order
+            const batch = db.batch(); // Create a new batch for atomic updates
+
+            // Iterate through the reordered list items and update their 'order' field in the batch
+            for (let i = 0; i < listItems.length; i++) {
+                const taskId = listItems[i].dataset.id; // Get the Firestore document ID from the listItem's data-id attribute
+                const taskRef = doc(db, `artifacts/${appId}/users/${userId}/tasks`, taskId); // Get a reference to the Firestore document
+                batch.update(taskRef, { order: i }); // Add an update operation to the batch, setting the new order (0-indexed)
+            }
+
+            try {
+                await batch.commit(); // Commit all batched updates to Firestore
+                console.log("Task order updated successfully.");
+            } catch (error) {
+                console.error("Error updating task order:", error);
+                showMessageBox("Failed to reorder tasks. Please try again.");
+            }
+        }
+
+
+        /**
+         * @function addTaskToFirestore
+         * @description Adds a new task document to the current user's Firestore collection.
+         * This function handles saving the task text, initial completion status,
+         * creation timestamp, optional due date, optional category, and an initial order.
+         * @param {string} text - The main text content of the task.
+         * @param {string|null} dueDate - The due date in 'YYYY-MM-DD' format (from input type="date"), or null if not provided.
+         * @param {string|null} dueTime - The due time in 'HH:MM' format (from input type="time"), or null if not provided.
+         * @param {string|null} category - The category string, or null/empty string if not provided.
+         * @returns {Promise<void>}
+         */
+        async function addTaskToFirestore(text, dueDate = null, dueTime = null, category = null) {
+            // Ensure user is logged in before adding tasks
             if (!db || !userId || !isAuthReady) {
                 showMessageBox("Please log in to add tasks.");
                 return;
             }
+            // Validate task text
             if (text.trim() === '') {
                 showMessageBox("Task cannot be empty!");
                 return;
             }
             try {
+                // Get the current number of tasks to set an initial 'order' value for the new task.
+                // This simple approach ensures new tasks appear at the end by default before manual reordering.
+                const currentTasksSnapshot = await getDocs(collection(db, `artifacts/${appId}/users/${userId}/tasks`));
+                const newOrder = currentTasksSnapshot.size; // The new task's order will be the current total count
+
+                // Add the new document to the 'tasks' subcollection for the current user
                 await addDoc(collection(db, `artifacts/${appId}/users/${userId}/tasks`), {
                     text: text,
-                    completed: false,
-                    timestamp: new Date() // Add a timestamp for sorting
+                    completed: false, // New tasks are always incomplete by default
+                    timestamp: new Date(), // Store creation timestamp
+                    dueDate: dueDate, // Store the provided due date
+                    dueTime: dueTime, // Store the provided due time
+                    category: category, // Store the provided category
+                    order: newOrder // Store the initial order for drag and drop
                 });
-                taskInput.value = ''; // Clear input after adding
+                // Clear input fields after successful addition
+                taskInput.value = '';
+                dueDateInput.value = '';
+                dueTimeInput.value = '';
+                categoryInput.value = '';
             } catch (e) {
                 console.error("Error adding document: ", e);
                 showMessageBox("Failed to add task. Please try again.");
             }
         }
 
-        // Function to toggle task completion in Firestore
+        /**
+         * @function updateTaskText
+         * @description Updates the text content of an existing task in Firestore.
+         * This is called when a user edits a task directly in the UI (contenteditable).
+         * @param {string} id - The Firestore document ID of the task to update.
+         * @param {string} newText - The new text content for the task.
+         * @returns {Promise<void>}
+         */
+        async function updateTaskText(id, newText) {
+            // Ensure user is logged in before updating tasks
+            if (!db || !userId || !isAuthReady) {
+                showMessageBox("Please log in to edit tasks.");
+                return;
+            }
+            // Validate new task text
+            if (newText.trim() === '') {
+                showMessageBox("Task text cannot be empty! Reverting to previous text.");
+                // If the new text is empty, re-fetch tasks to revert the UI to the last saved state
+                setupRealtimeListener();
+                return;
+            }
+            try {
+                const taskRef = doc(db, `artifacts/${appId}/users/${userId}/tasks`, id); // Get reference to the specific task document
+                await updateDoc(taskRef, {
+                    text: newText // Update only the 'text' field
+                });
+            } catch (e) {
+                console.error("Error updating task text: ", e);
+                showMessageBox("Failed to update task text. Please try again.");
+            }
+        }
+
+        /**
+         * @function toggleTaskCompletion
+         * @description Toggles the 'completed' status of a task in Firestore.
+         * This function is called when a user clicks on a task's text.
+         * @param {string} id - The Firestore document ID of the task to update.
+         * @param {boolean} completed - The new completion status (true for completed, false for active).
+         * @returns {Promise<void>}
+         */
         async function toggleTaskCompletion(id, completed) {
+            // Ensure user is logged in before updating tasks
             if (!db || !userId || !isAuthReady) {
                 showMessageBox("Please log in to update tasks.");
                 return;
             }
             try {
-                const taskRef = doc(db, `artifacts/${appId}/users/${userId}/tasks`, id);
+                const taskRef = doc(db, `artifacts/${appId}/users/${userId}/tasks`, id); // Get reference to the specific task document
                 await updateDoc(taskRef, {
-                    completed: completed
+                    completed: completed // Update the 'completed' field
                 });
             } catch (e) {
                 console.error("Error updating document: ", e);
@@ -330,14 +788,20 @@
             }
         }
 
-        // Function to delete a task from Firestore
+        /**
+         * @function deleteTask
+         * @description Deletes a task document from the user's Firestore collection.
+         * @param {string} id - The Firestore document ID of the task to delete.
+         * @returns {Promise<void>}
+         */
         async function deleteTask(id) {
+            // Ensure user is logged in before deleting tasks
             if (!db || !userId || !isAuthReady) {
                 showMessageBox("Please log in to delete tasks.");
                 return;
             }
             try {
-                await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/tasks`, id));
+                await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/tasks`, id)); // Delete the specific task document
             } catch (e) {
                 console.error("Error deleting document: ", e);
                 showMessageBox("Failed to delete task. Please try again.");
@@ -346,22 +810,34 @@
 
         // --- Authentication Functions ---
 
+        /**
+         * @function handleSignUp
+         * @description Handles user registration with email and password using Firebase Authentication.
+         * Upon successful signup, it automatically sends an email verification link
+         * to the registered email address.
+         * @returns {Promise<void>}
+         */
         async function handleSignUp() {
             const email = emailInput.value;
             const password = passwordInput.value;
 
+            // Basic client-side validation for input fields
             if (!email || !password) {
                 showMessageBox("Please enter both email and password.");
                 return;
             }
 
             try {
-                await createUserWithEmailAndPassword(auth, email, password);
-                showMessageBox("Account created and logged in successfully!");
-                // onAuthStateChanged will handle UI update
+                // Create user account with email and password
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                // Send email verification to the newly created user
+                await sendEmailVerification(userCredential.user);
+                showMessageBox("Account created! A verification email has been sent to your address. Please verify your email to ensure full functionality.");
+                // The `onAuthStateChanged` listener will automatically detect the new login state and update the UI.
             } catch (error) {
                 console.error("Error signing up:", error);
                 let errorMessage = "Failed to create account.";
+                // Provide user-friendly error messages based on Firebase error codes
                 switch (error.code) {
                     case 'auth/email-already-in-use':
                         errorMessage = "This email is already in use. Try logging in.";
@@ -379,24 +855,32 @@
             }
         }
 
+        /**
+         * @function handleLogin
+         * @description Handles user login with email and password using Firebase Authentication.
+         * @returns {Promise<void>}
+         */
         async function handleLogin() {
             const email = emailInput.value;
             const password = passwordInput.value;
 
+            // Basic client-side validation for input fields
             if (!email || !password) {
                 showMessageBox("Please enter both email and password.");
                 return;
             }
 
             try {
+                // Sign in user with email and password
                 await signInWithEmailAndPassword(auth, email, password);
                 showMessageBox("Logged in successfully!");
-                // onAuthStateChanged will handle UI update
+                // The `onAuthStateChanged` listener will automatically detect the new login state and update the UI.
             } catch (error) {
                 console.error("Error logging in:", error);
-                let errorMessage = "Failed to log in.";
+                let errorMessage = "Invalid email or password.";
+                // Provide user-friendly error messages based on Firebase error codes
                 switch (error.code) {
-                    case 'auth/invalid-credential': // This covers auth/wrong-password and auth/user-not-found
+                    case 'auth/invalid-credential': // Covers both incorrect password and user not found for security
                         errorMessage = "Invalid email or password.";
                         break;
                     case 'auth/invalid-email':
@@ -409,42 +893,173 @@
             }
         }
 
+        /**
+         * @function handleLogout
+         * @description Handles user logout from Firebase Authentication.
+         * @returns {Promise<void>}
+         */
         async function handleLogout() {
             try {
-                await signOut(auth);
+                await signOut(auth); // Sign out the current user
                 showMessageBox("Logged out successfully!");
-                // onAuthStateChanged will handle UI update
+                // The `onAuthStateChanged` listener will automatically detect the logout state and update the UI.
             } catch (error) {
                 console.error("Error logging out:", error);
                 showMessageBox("Failed to log out. Please try again.");
             }
         }
 
-        // Event listeners
-        addTaskBtn.addEventListener('click', () => addTaskToFirestore(taskInput.value));
+        /**
+         * @function handleForgotPassword
+         * @description Sends a password reset email to the provided email address using Firebase Authentication.
+         * This allows users to regain access to their account if they forget their password.
+         * @returns {Promise<void>}
+         */
+        async function handleForgotPassword() {
+            const email = emailInput.value;
+            // Ensure an email address is provided to send the reset link to
+            if (!email) {
+                showMessageBox("Please enter your email address to reset your password.");
+                return;
+            }
+            try {
+                await sendPasswordResetEmail(auth, email); // Send the password reset email
+                showMessageBox(`Password reset email sent to ${email}. Please check your inbox.`);
+            } catch (error) {
+                console.error("Error sending password reset email:", error);
+                let errorMessage = "Failed to send password reset email.";
+                // Provide user-friendly error messages based on Firebase error codes
+                switch (error.code) {
+                    case 'auth/invalid-email':
+                        errorMessage = "Invalid email address.";
+                        break;
+                    case 'auth/user-not-found':
+                        errorMessage = "No user found with that email address.";
+                        break;
+                    default:
+                        errorMessage = `Error: ${error.message}`;
+                }
+                showMessageBox(errorMessage);
+            }
+        }
+
+        /**
+         * @function handleResendVerificationEmail
+         * @description Resends the email verification link to the currently logged-in user's email address.
+         * This function is typically called when a user clicks a "Resend" button if their email is unverified.
+         * @returns {Promise<void>}
+         */
+        async function handleResendVerificationEmail() {
+            // Only attempt to resend if a user is logged in and their email is not yet verified
+            if (currentUser && !currentUser.emailVerified) {
+                try {
+                    await sendEmailVerification(currentUser); // Send the verification email
+                    showMessageBox("Verification email re-sent! Please check your inbox.");
+                } catch (error) {
+                    console.error("Error resending verification email:", error);
+                    showMessageBox("Failed to resend verification email. Please try again.");
+                }
+            } else {
+                showMessageBox("No unverified user logged in, or email already verified.");
+            }
+        }
+
+        // --- Gemini API Integration ---
+        // The elaborateTaskWithGemini function and its associated UI elements have been removed as requested.
+
+        // --- Event Listeners for UI Interactions ---
+
+        /**
+         * @description Event listener for the "Add Task" button click.
+         * Calls `addTaskToFirestore` with the current values from the task, due date, time, and category input fields.
+         */
+        addTaskBtn.addEventListener('click', () => addTaskToFirestore(taskInput.value, dueDateInput.value, dueTimeInput.value, categoryInput.value.trim()));
+
+        /**
+         * @description Event listener for the task input field's `keypress` event.
+         * If the 'Enter' key is pressed, it calls `addTaskToFirestore` to add the task.
+         */
         taskInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                addTaskToFirestore(taskInput.value);
+                addTaskToFirestore(taskInput.value, dueDateInput.value, dueTimeInput.value, categoryInput.value.trim());
             }
         });
 
+        /**
+         * @description Event listener for the "Log In" button click.
+         * Calls the `handleLogin` function to attempt user authentication.
+         */
         loginBtn.addEventListener('click', handleLogin);
+
+        /**
+         * @description Event listener for the "Sign Up" button click.
+         * Calls the `handleSignUp` function to attempt user registration.
+         */
         signupBtn.addEventListener('click', handleSignUp);
+
+        /**
+         * @description Event listener for the "Log Out" button click.
+         * Calls the `handleLogout` function to sign out the current user.
+         */
         logoutBtn.addEventListener('click', handleLogout);
 
-        // Allow pressing Enter in email/password fields to trigger login/signup
+        /**
+         * @description Event listener for the "Forgot Password?" button click.
+         * Calls the `handleForgotPassword` function to initiate a password reset.
+         */
+        forgotPasswordBtn.addEventListener('click', handleForgotPassword);
+
+        /**
+         * @description Event listener for the "Resend Verification" button click.
+         * Calls the `handleResendVerificationEmail` function to resend the email verification link.
+         */
+        resendVerificationBtn.addEventListener('click', handleResendVerificationEmail);
+
+        // Removed: elaborateTaskBtn.addEventListener('click', elaborateTaskWithGemini);
+
+        /**
+         * @description Event listener for the filter dropdown (`filterSelect`) change event.
+         * Updates the `currentFilter` state and triggers a re-fetch and re-render of tasks.
+         */
+        filterSelect.addEventListener('change', (e) => {
+            currentFilter = e.target.value;
+            setupRealtimeListener(); // Re-fetch and re-render with the new filter
+        });
+
+        /**
+         * @description Event listener for the sort dropdown (`sortSelect`) change event.
+         * Updates the `currentSort` state and triggers a re-fetch and re-render of tasks.
+         */
+        sortSelect.addEventListener('change', (e) => {
+            currentSort = e.target.value;
+            setupRealtimeListener(); // Re-fetch and re-render with the new sort
+        });
+
+
+        /**
+         * @description Event listener for the email input field's `keypress` event.
+         * If the 'Enter' key is pressed, it moves focus to the password input field.
+         */
         emailInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                passwordInput.focus(); // Move to password field
-            }
-        });
-        passwordInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                handleLogin(); // Try to log in
+                passwordInput.focus(); // Move focus to the password field
             }
         });
 
-        // Initialize Firebase when the window loads
+        /**
+         * @description Event listener for the password input field's `keypress` event.
+         * If the 'Enter' key is pressed, it attempts to log in by calling `handleLogin`.
+         */
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleLogin(); // Attempt to log in
+            }
+        });
+
+        /**
+         * @description Initializes Firebase and sets up the authentication listener
+         * once the entire window has finished loading. This is the entry point of the application's JavaScript.
+         */
         window.onload = initializeFirebase;
     </script>
 </body>
