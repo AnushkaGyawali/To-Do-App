@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List App</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e0e0e0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <!-- Login/Registration Container -->
+    <div id="authContainer" class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md hidden">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Welcome</h1>
+        <p class="text-gray-600 mb-4 text-center">Sign in or create an account to manage your tasks.</p>
+
+        <div class="mb-4">
+            <label for="emailInput" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+            <input type="email" id="emailInput" placeholder="your@example.com"
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+        </div>
+        <div class="mb-6">
+            <label for="passwordInput" class="block text-gray-700 text-sm font-bold mb-2">Password:</label>
+            <input type="password" id="passwordInput" placeholder="********"
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+        </div>
+
+        <div class="flex flex-col space-y-3">
+            <button id="loginBtn"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md">
+                Log In
+            </button>
+            <button id="signupBtn"
+                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md">
+                Sign Up
+            </button>
+		<p class="text-center text-sm text-blue-600 font-medium mb-2">First Time User? Please Press "Sign Up"!</p>
+        </div>
+    </div>
+
+    <!-- To-Do List Container -->
+    <div id="todoContainer" class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md hidden">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">My To-Do List</h1>
+
+        <!-- User ID Display -->
+        <div id="userIdDisplay" class="text-sm text-gray-600 mb-4 text-center break-words">
+            Loading user...
+        </div>
+
+        <div class="flex mb-6">
+            <input type="text" id="taskInput" placeholder="Add a new task..."
+                   class="flex-grow p-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+            <button id="addTaskBtn"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-5 rounded-r-lg transition duration-300 ease-in-out shadow-md">
+                Add
+            </button>
+        </div>
+
+        <ul id="taskList" class="space-y-3">
+            <!-- Tasks will be dynamically added here -->
+        </ul>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="text-center text-gray-500 mt-4 hidden">
+            Loading tasks...
+        </div>
+
+        <button id="logoutBtn"
+                class="mt-6 w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md">
+            Log Out
+        </button>
+    </div>
+
+    <!-- Message Box for alerts -->
+    <div id="messageBox" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
+            <p id="messageText" class="text-lg font-semibold text-gray-800 mb-4"></p>
+            <button id="messageBoxCloseBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase imports - Updated to v12.0.0 based on your provided config
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+        import {
+            getAuth,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            onAuthStateChanged,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+            updateDoc,
+            deleteDoc,
+            doc,
+            onSnapshot,
+            query
+        } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7ZesRhCUfElvv58AyzSQjXcP_dqbFH_4",
+            authDomain: "my-to-do-app-cd314.firebaseapp.com",
+            projectId: "my-to-do-app-cd314",
+            storageBucket: "my-to-do-app-cd314.firebasestorage.app",
+            messagingSenderId: "184421960045",
+            appId: "1:184421960045:web:57b0e84b5b38ebaf27b264",
+            measurementId: "G-S0VBJXLSDX"
+        };
+
+        // Manually define appId using the projectId from your firebaseConfig
+        const appId = firebaseConfig.projectId;
+
+        // Initialize Firebase
+        let app;
+        let db;
+        let auth;
+        let userId = null;
+        let isAuthReady = false; // Flag to indicate if authentication is ready
+        let unsubscribeFromTasks = null; // To store the unsubscribe function for the Firestore listener
+
+        // DOM elements for Auth
+        const authContainer = document.getElementById('authContainer');
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginBtn = document.getElementById('loginBtn');
+        const signupBtn = document.getElementById('signupBtn');
+
+        // DOM elements for To-Do List
+        const todoContainer = document.getElementById('todoContainer');
+        const taskInput = document.getElementById('taskInput');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+        const taskList = document.getElementById('taskList');
+        const userIdDisplay = document.getElementById('userIdDisplay');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // DOM elements for Message Box
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const messageBoxCloseBtn = document.getElementById('messageBoxCloseBtn');
+
+        // Function to show custom message box
+        function showMessageBox(message) {
+            messageText.textContent = message;
+            messageBox.classList.remove('hidden');
+        }
+
+        // Close message box
+        messageBoxCloseBtn.addEventListener('click', () => {
+            messageBox.classList.add('hidden');
+        });
+
+        // Initialize Firebase and set up authentication listener
+        async function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Listen for authentication state changes
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        // User is signed in
+                        userId = user.uid;
+                        userIdDisplay.textContent = `User ID: ${userId}`;
+                        isAuthReady = true;
+                        authContainer.classList.add('hidden');
+                        todoContainer.classList.remove('hidden');
+                        console.log("User signed in:", userId);
+                        setupRealtimeListener(); // Start listening for tasks
+                    } else {
+                        // User is signed out
+                        userId = null;
+                        isAuthReady = false;
+                        authContainer.classList.remove('hidden');
+                        todoContainer.classList.add('hidden');
+                        taskList.innerHTML = ''; // Clear tasks when logged out
+                        userIdDisplay.textContent = 'Please log in.';
+                        console.log("User signed out.");
+                        // If there's an active listener, unsubscribe it
+                        if (unsubscribeFromTasks) {
+                            unsubscribeFromTasks();
+                            unsubscribeFromTasks = null;
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Error initializing Firebase:", error);
+                showMessageBox("Failed to initialize the application. Check console for details.");
+            }
+        }
+
+        // Function to set up real-time listener for tasks
+        function setupRealtimeListener() {
+            if (!db || !userId || !isAuthReady) {
+                console.log("Firestore not ready or user not authenticated. Skipping listener setup.");
+                return;
+            }
+
+            loadingIndicator.classList.remove('hidden');
+            const tasksCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/tasks`);
+            const q = query(tasksCollectionRef);
+
+            // Unsubscribe from previous listener if it exists to prevent multiple listeners
+            if (unsubscribeFromTasks) {
+                unsubscribeFromTasks();
+            }
+
+            unsubscribeFromTasks = onSnapshot(q, (snapshot) => {
+                taskList.innerHTML = ''; // Clear current list
+                const tasks = [];
+                snapshot.forEach(doc => {
+                    const taskData = doc.data();
+                    tasks.push({ id: doc.id, ...taskData });
+                });
+
+                // Sort tasks by timestamp in memory
+                tasks.sort((a, b) => (a.timestamp ? a.timestamp.toDate() : 0) - (b.timestamp ? b.timestamp.toDate() : 0));
+
+                tasks.forEach(task => displayTask(task));
+                loadingIndicator.classList.add('hidden');
+            }, (error) => {
+                console.error("Error fetching real-time tasks:", error);
+                showMessageBox("Error loading tasks. Please refresh.");
+                loadingIndicator.classList.add('hidden');
+            });
+        }
+
+        // Function to display a single task in the UI
+        function displayTask(task) {
+            const listItem = document.createElement('li');
+            listItem.dataset.id = task.id;
+            listItem.classList.add('flex', 'items-center', 'justify-between', 'bg-gray-50', 'p-3', 'rounded-lg', 'shadow-sm', 'transition', 'duration-200', 'ease-in-out');
+
+            const taskTextSpan = document.createElement('span');
+            taskTextSpan.textContent = task.text;
+            taskTextSpan.classList.add('flex-grow', 'text-gray-700', 'text-lg', 'cursor-pointer');
+
+            if (task.completed) {
+                taskTextSpan.classList.add('line-through', 'text-gray-500');
+            }
+
+            // Toggle completion on click
+            taskTextSpan.addEventListener('click', () => toggleTaskCompletion(task.id, !task.completed));
+
+            const actionsDiv = document.createElement('div');
+            actionsDiv.classList.add('flex', 'space-x-2', 'ml-4');
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500 hover:text-red-700 transition duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            `;
+            deleteBtn.classList.add('p-1', 'rounded-full', 'hover:bg-gray-200');
+            deleteBtn.title = "Delete Task";
+            deleteBtn.addEventListener('click', () => deleteTask(task.id));
+
+            actionsDiv.appendChild(deleteBtn);
+            listItem.appendChild(taskTextSpan);
+            listItem.appendChild(actionsDiv);
+            taskList.appendChild(listItem);
+        }
+
+        // Function to add a new task to Firestore
+        async function addTaskToFirestore(text) {
+            if (!db || !userId || !isAuthReady) {
+                showMessageBox("Please log in to add tasks.");
+                return;
+            }
+            if (text.trim() === '') {
+                showMessageBox("Task cannot be empty!");
+                return;
+            }
+            try {
+                await addDoc(collection(db, `artifacts/${appId}/users/${userId}/tasks`), {
+                    text: text,
+                    completed: false,
+                    timestamp: new Date() // Add a timestamp for sorting
+                });
+                taskInput.value = ''; // Clear input after adding
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                showMessageBox("Failed to add task. Please try again.");
+            }
+        }
+
+        // Function to toggle task completion in Firestore
+        async function toggleTaskCompletion(id, completed) {
+            if (!db || !userId || !isAuthReady) {
+                showMessageBox("Please log in to update tasks.");
+                return;
+            }
+            try {
+                const taskRef = doc(db, `artifacts/${appId}/users/${userId}/tasks`, id);
+                await updateDoc(taskRef, {
+                    completed: completed
+                });
+            } catch (e) {
+                console.error("Error updating document: ", e);
+                showMessageBox("Failed to update task status. Please try again.");
+            }
+        }
+
+        // Function to delete a task from Firestore
+        async function deleteTask(id) {
+            if (!db || !userId || !isAuthReady) {
+                showMessageBox("Please log in to delete tasks.");
+                return;
+            }
+            try {
+                await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/tasks`, id));
+            } catch (e) {
+                console.error("Error deleting document: ", e);
+                showMessageBox("Failed to delete task. Please try again.");
+            }
+        }
+
+        // --- Authentication Functions ---
+
+        async function handleSignUp() {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                showMessageBox("Please enter both email and password.");
+                return;
+            }
+
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                showMessageBox("Account created and logged in successfully!");
+                // onAuthStateChanged will handle UI update
+            } catch (error) {
+                console.error("Error signing up:", error);
+                let errorMessage = "Failed to create account.";
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = "This email is already in use. Try logging in.";
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = "Invalid email address.";
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = "Password should be at least 6 characters.";
+                        break;
+                    default:
+                        errorMessage = `Error: ${error.message}`;
+                }
+                showMessageBox(errorMessage);
+            }
+        }
+
+        async function handleLogin() {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                showMessageBox("Please enter both email and password.");
+                return;
+            }
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                showMessageBox("Logged in successfully!");
+                // onAuthStateChanged will handle UI update
+            } catch (error) {
+                console.error("Error logging in:", error);
+                let errorMessage = "Failed to log in.";
+                switch (error.code) {
+                    case 'auth/invalid-credential': // This covers auth/wrong-password and auth/user-not-found
+                        errorMessage = "Invalid email or password.";
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = "Invalid email address format.";
+                        break;
+                    default:
+                        errorMessage = `Error: ${error.message}`;
+                }
+                showMessageBox(errorMessage);
+            }
+        }
+
+        async function handleLogout() {
+            try {
+                await signOut(auth);
+                showMessageBox("Logged out successfully!");
+                // onAuthStateChanged will handle UI update
+            } catch (error) {
+                console.error("Error logging out:", error);
+                showMessageBox("Failed to log out. Please try again.");
+            }
+        }
+
+        // Event listeners
+        addTaskBtn.addEventListener('click', () => addTaskToFirestore(taskInput.value));
+        taskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addTaskToFirestore(taskInput.value);
+            }
+        });
+
+        loginBtn.addEventListener('click', handleLogin);
+        signupBtn.addEventListener('click', handleSignUp);
+        logoutBtn.addEventListener('click', handleLogout);
+
+        // Allow pressing Enter in email/password fields to trigger login/signup
+        emailInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                passwordInput.focus(); // Move to password field
+            }
+        });
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleLogin(); // Try to log in
+            }
+        });
+
+        // Initialize Firebase when the window loads
+        window.onload = initializeFirebase;
+    </script>
+</body>
+</html>
