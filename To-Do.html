@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced To-Do List App</title>
+    <!-- Tailwind CSS CDN for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font for modern typography -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* Basic body styling for font and background */
@@ -38,7 +40,7 @@
             opacity: 0.5; /* Make the dragged item semi-transparent */
             border: 2px dashed #60a5fa; /* Add a dashed border */
         }
-        /* Modal overlay styling for Fider and other modals */
+        /* Modal overlay styling for other modals (messageBox) */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -54,21 +56,25 @@
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
+    <!-- Authentication Container: Shown when user is not logged in -->
     <div id="authContainer" class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md hidden">
         <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Welcome</h1>
         <p class="text-gray-600 mb-4 text-center">Sign in or create an account to manage your tasks.</p>
 
+        <!-- Email Input Field -->
         <div class="mb-4">
             <label for="emailInput" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
             <input type="email" id="emailInput" placeholder="your@example.com"
                    class="w-full p-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 shadow-sm">
         </div>
+        <!-- Password Input Field -->
         <div class="mb-6">
             <label for="passwordInput" class="block text-gray-700 text-sm font-bold mb-2">Password:</label>
             <input type="password" id="passwordInput" placeholder="********"
                    class="w-full p-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 shadow-sm">
         </div>
 
+        <!-- Authentication Buttons -->
         <div class="flex flex-col space-y-3">
             <p class="text-center text-sm text-blue-600 font-medium mb-2">First Time User? Please Press "Sign Up"!</p>
             <button id="loginBtn"
@@ -86,18 +92,22 @@
         </div>
     </div>
 
+    <!-- To-Do List Container: Shown when user is logged in -->
     <div id="todoContainer" class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md hidden">
         <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">My To-Do List</h1>
 
+        <!-- User ID and Email Verification Status Display -->
         <div class="mb-4 text-center">
             <div id="userIdDisplay" class="text-sm text-gray-600 mb-1 break-words">
                 Loading user...
             </div>
+            <!-- Email verification message, hidden by default -->
             <div id="emailVerificationMessage" class="text-sm text-red-500 font-semibold mb-2 hidden">
                 Email not verified. <button id="resendVerificationBtn" class="text-blue-600 hover:text-blue-800 underline">Resend</button>
             </div>
         </div>
 
+        <!-- Task Input Section: Includes task text, due date, category, and action buttons -->
         <div class="flex flex-wrap items-center gap-2 mb-6">
             <input type="text" id="taskInput" placeholder="Add a new task..."
                    class="flex-grow p-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 shadow-sm">
@@ -115,6 +125,7 @@
             </button>
         </div>
 
+        <!-- Filter and Sort Controls -->
         <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
             <div class="flex items-center w-full sm:w-auto justify-between sm:justify-start">
                 <label for="filterSelect" class="text-gray-700 mr-2">Show:</label>
@@ -137,24 +148,34 @@
             </div>
         </div>
 
+        <!-- Task List: Where tasks are dynamically rendered -->
         <ul id="taskList" class="space-y-3">
-            </ul>
+            <!-- Tasks will be dynamically added here by JavaScript -->
+        </ul>
 
+        <!-- Loading Indicator for tasks -->
         <div id="loadingIndicator" class="text-center text-gray-500 mt-4 hidden">
             Loading tasks...
         </div>
 
+        <!-- Fider Feedback Button -->
         <button id="openFiderBtn"
                 class="mt-6 w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md">
             Feedback & Ideas (Fider.io)
         </button>
+        <!-- Small note about Fider sign-in -->
+        <p class="text-xs text-gray-500 text-center mt-2">
+            (Note: Feedback board requires a separate sign-in on Fider.io)
+        </p>
 
+        <!-- Logout Button -->
         <button id="logoutBtn"
                 class="mt-3 w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md">
             Log Out
         </button>
     </div>
 
+    <!-- Custom Message Box for alerts and confirmations -->
     <div id="messageBox" class="modal-overlay hidden">
         <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
             <p id="messageText" class="text-lg font-semibold text-gray-800 mb-4"></p>
@@ -163,18 +184,6 @@
             </button>
         </div>
     </div>
-
-    <div id="fiderModal" class="modal-overlay hidden">
-        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-2xl mx-4 my-8 relative h-5/6 flex flex-col">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-2xl font-bold text-gray-800">Feedback & Ideas</h3>
-                <button id="closeFiderModalBtn" class="text-gray-500 hover:text-gray-800 text-3xl font-bold leading-none">&times;</button>
-            </div>
-            <div class="flex-grow flex items-center justify-center"> <iframe src="https://echotasks.fider.io/" frameborder="0" class="w-full h-full rounded-lg"></iframe>
-            </div>
-        </div>
-    </div>
-
 
     <script type="module">
         // Firebase SDK Imports:
@@ -265,8 +274,7 @@
 
         // New: Fider Integration Elements
         const openFiderBtn = document.getElementById('openFiderBtn');
-        const fiderModal = document.getElementById('fiderModal');
-        const closeFiderModalBtn = document.getElementById('closeFiderModalBtn');
+        // Removed: fiderModal and closeFiderModalBtn as they are no longer needed for iframe embedding
 
         // Message Box Elements
         const messageBox = document.getElementById('messageBox');
@@ -1048,26 +1056,11 @@
         });
 
         /**
-         * @description Event listener for the "Feedback & Ideas" button to open the Fider modal.
+         * @description Event listener for the "Feedback & Ideas" button to open the Fider board in a new tab.
+         * This approach avoids third-party cookie issues encountered with iframes.
          */
         openFiderBtn.addEventListener('click', () => {
-            fiderModal.classList.remove('hidden');
-        });
-
-        /**
-         * @description Event listener for the "Close" button within the Fider modal.
-         */
-        closeFiderModalBtn.addEventListener('click', () => {
-            fiderModal.classList.add('hidden');
-        });
-
-        /**
-         * @description Event listener to close the Fider modal when clicking on the overlay.
-         */
-        fiderModal.addEventListener('click', (e) => {
-            if (e.target === fiderModal) {
-                fiderModal.classList.add('hidden');
-            }
+            window.open('https://echotasks.fider.io/', '_blank'); // Opens Fider in a new tab
         });
 
         /**
