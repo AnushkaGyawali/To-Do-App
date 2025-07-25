@@ -12,50 +12,87 @@
         /* Basic body styling for font and background */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Light gray background */
+            /* background-color is now set via Tailwind class on the body tag (bg-mint-cream) */
         }
         /* Custom scrollbar for better aesthetics */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 8px; /* Sets the width of the scrollbar */
         }
         ::-webkit-scrollbar-track {
-            background: #e0e0e0;
-            border-radius: 10px;
+            background: #e0e0e0; /* Color of the scrollbar track */
+            border-radius: 10px; /* Rounds the corners of the scrollbar track */
         }
         ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
+            background: #888; /* Color of the scrollbar thumb (the draggable part) */
+            border-radius: 10px; /* Rounds the corners of the scrollbar thumb */
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #555;
+            background: #555; /* Color of the scrollbar thumb on hover */
         }
         /* Style for contenteditable elements when focused (for task editing) */
         [contenteditable]:focus {
-            outline: 2px solid #3b82f6; /* Blue ring on focus */
-            border-radius: 0.25rem; /* Rounded corners */
-            padding: 0.25rem;
+            outline: 2px solid theme('colors.non-photo-blue'); /* Adds a 2px solid outline using 'non-photo-blue' color when an editable element is focused */
+            border-radius: 0.25rem; /* Adds rounded corners to the outline */
+            padding: 0.25rem; /* Adds some padding inside the outline */
         }
         /* Visual feedback for drag and drop operations */
         .dragging {
-            opacity: 0.5; /* Make the dragged item semi-transparent */
-            border: 2px dashed #60a5fa; /* Add a dashed border */
+            opacity: 0.5; /* Makes the dragged item semi-transparent */
+            border: 2px dashed theme('colors.non-photo-blue'); /* Adds a dashed border using 'non-photo-blue' color to the dragged item */
         }
         /* Modal overlay styling for other modals (messageBox) */
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000; /* Ensure it's on top of other content */
+            position: fixed; /* Positions the modal relative to the viewport */
+            top: 0; /* Aligns to the top of the viewport */
+            left: 0; /* Aligns to the left of the viewport */
+            width: 100%; /* Makes the overlay span the full width of the viewport */
+            height: 100%; /* Makes the overlay span the full height of the viewport */
+            background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black background */
+            display: flex; /* Uses flexbox for centering its content */
+            justify-content: center; /* Centers content horizontally */
+            align-items: center; /* Centers content vertically */
+            z-index: 1000; /* Ensures it's on top of other content */
+        }
+        /* Custom class for the hover-to-expand functionality for Fider instructions */
+        .fider-info-container .fider-instructions {
+            max-height: 0; /* Initially hides the instructions by setting max-height to 0 */
+            overflow: hidden; /* Hides any overflowing content */
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out; /* Smooth transition for max-height and opacity when collapsing */
+            opacity: 0; /* Makes the instructions invisible initially */
+        }
+        .fider-info-container:hover .fider-instructions {
+            max-height: 100px; /* Expands the instructions on hover (adjust as needed based on content height) */
+            opacity: 1; /* Makes the instructions fully visible on hover */
+            transition: max-height 0.3s ease-in, opacity 0.3s ease-in; /* Smooth transition for max-height and opacity when expanding */
         }
     </style>
+    <!-- Tailwind CSS configuration to extend default colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // New Palette
+                        'mint-cream': '#eff7f6', // Light, clean background color
+                        'lavender-pink': '#f2b5d4', // Primary action color, encouraging tone
+                        'mimi-pink': '#f7d6e0', // Secondary elements, subtle highlights
+                        'celeste': '#b2f7ef', // Informational text, completed tasks
+                        'non-photo-blue': '#7bdff2', // Accent color for focus states and notifications
+
+                        // Keeping previous colors for specific uses (like alerts/logout)
+                        'light_coral': { DEFAULT: '#f08080', 100: '#420808', 200: '#830f0f', 300: '#c51717', 400: '#e83d3d', 500: '#f08080', 600: '#f39999', 700: '#f6b2b2', 800: '#f9cccc', 900: '#fce5e5' }, // Used for warnings/destructive actions
+                        'coral_pink': { DEFAULT: '#f4978e', 100: '#470c07', 200: '#8d190e', 300: '#d42515', 400: '#ed5749', 500: '#f4978e', 600: '#f6ada6', 700: '#f8c1bc', 800: '#fbd6d2', 900: '#fdeae9' }, // Used for due today tasks
+                        'melon': { DEFAULT: '#f8ad9d', 100: '#4b1205', 200: '#97240a', 300: '#e23610', 400: '#f36d50', 500: '#f8ad9d', 600: '#f9bdaf', 700: '#fbcdc3', 800: '#fcded7', 900: '#feeeeb' },
+                        'apricot': { DEFAULT: '#fbc4ab', 100: '#511c04', 200: '#a23808', 300: '#f3550b', 400: '#f78d5b', 500: '#fbc4ab', 600: '#fcd1bd', 700: '#fddccd', 800: '#fde8de', 900: '#fef3ee' },
+                        'light_orange': { DEFAULT: '#ffdab9', 100: '#582900', 200: '#af5200', 300: '#ff7b08', 400: '#ffaa60', 500: '#ffdab9', 600: '#ffe1c6', 700: '#ffe8d4', 800: '#fff0e2', 900: '#fff7f1' },
+                        'baby-powder': '#fffffc', // General light background, similar to white
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="flex items-center justify-center min-h-screen p-4 bg-mint-cream">
     <!-- Authentication Container: Shown when user is not logged in -->
     <div id="authContainer" class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md hidden">
         <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Welcome</h1>
@@ -65,28 +102,28 @@
         <div class="mb-4">
             <label for="emailInput" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
             <input type="email" id="emailInput" placeholder="your@example.com"
-                   class="w-full p-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 shadow-sm">
+                   class="w-full p-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue text-gray-800 shadow-sm border border-gray-200">
         </div>
         <!-- Password Input Field -->
         <div class="mb-6">
             <label for="passwordInput" class="block text-gray-700 text-sm font-bold mb-2">Password:</label>
             <input type="password" id="passwordInput" placeholder="********"
-                   class="w-full p-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 shadow-sm">
+                   class="w-full p-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue text-gray-800 shadow-sm border border-gray-200">
         </div>
 
         <!-- Authentication Buttons -->
         <div class="flex flex-col space-y-3">
-            <p class="text-center text-sm text-blue-600 font-medium mb-2">First Time User? Please Press "Sign Up"!</p>
+            <p class="text-center text-sm text-lavender-pink font-medium mb-2">First Time User? Please Press "Sign Up"!</p>
             <button id="loginBtn"
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md">
+                    class="bg-lavender-pink hover:bg-mimi-pink text-gray-800 font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg">
                 Log In
             </button>
             <button id="signupBtn"
-                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md">
+                    class="bg-mimi-pink hover:bg-lavender-pink text-gray-800 font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg">
                 Sign Up
             </button>
             <button id="forgotPasswordBtn"
-                    class="text-blue-600 hover:text-blue-800 text-sm mt-2 transition duration-300 ease-in-out">
+                    class="text-non-photo-blue hover:text-celeste text-sm mt-2 transition duration-300 ease-in-out hover:underline">
                 Forgot Password?
             </button>
         </div>
@@ -102,25 +139,25 @@
                 Loading user...
             </div>
             <!-- Email verification message, hidden by default -->
-            <div id="emailVerificationMessage" class="text-sm text-red-500 font-semibold mb-2 hidden">
-                Email not verified. <button id="resendVerificationBtn" class="text-blue-600 hover:text-blue-800 underline">Resend</button>
+            <div id="emailVerificationMessage" class="text-light_coral-500 font-semibold mb-2 hidden">
+                Email not verified. <button id="resendVerificationBtn" class="text-non-photo-blue hover:text-celeste underline">Resend</button>
             </div>
         </div>
 
         <!-- Task Input Section: Includes task text, due date, category, and action buttons -->
         <div class="flex flex-wrap items-center gap-2 mb-6">
             <input type="text" id="taskInput" placeholder="Add a new task..."
-                   class="flex-grow p-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 shadow-sm">
+                   class="flex-grow p-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue text-gray-800 shadow-sm border border-gray-200">
             <input type="date" id="dueDateInput"
-                   class="p-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 shadow-sm">
+                   class="p-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue text-gray-800 shadow-sm border border-gray-200">
             <input type="time" id="dueTimeInput"
-                   class="p-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 shadow-sm">
+                   class="p-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue text-gray-800 shadow-sm border border-gray-200">
             <input type="text" id="categoryInput" placeholder="Category (e.g., Work)"
-                   class="p-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 w-full sm:w-auto shadow-sm">
+                   class="p-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue text-gray-800 w-full sm:w-auto shadow-sm border border-gray-200">
         </div>
         <div class="flex flex-wrap gap-2 mb-6">
             <button id="addTaskBtn"
-                    class="flex-grow bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md">
+                    class="flex-grow bg-lavender-pink hover:bg-mimi-pink text-gray-800 font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg">
                 Add Task
             </button>
         </div>
@@ -129,7 +166,7 @@
         <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
             <div class="flex items-center w-full sm:w-auto justify-between sm:justify-start">
                 <label for="filterSelect" class="text-gray-700 mr-2">Show:</label>
-                <select id="filterSelect" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="filterSelect" class="p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue">
                     <option value="all">All</option>
                     <option value="active">Active</option>
                     <option value="completed">Completed</option>
@@ -137,7 +174,7 @@
             </div>
             <div class="flex items-center w-full sm:w-auto justify-between sm:justify-start">
                 <label for="sortSelect" class="text-gray-700 mr-2">Sort by:</label>
-                <select id="sortSelect" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="sortSelect" class="p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue">
                     <option value="timestamp_asc">Oldest First</option>
                     <option value="timestamp_desc">Newest First</option>
                     <option value="dueDate_asc">Due Date (Asc)</option>
@@ -158,28 +195,40 @@
             Loading tasks...
         </div>
 
-        <!-- Fider Feedback Button -->
-        <button id="openFiderBtn"
-                class="mt-6 w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md">
-            Feedback & Ideas (Fider.io)
-        </button>
-        <!-- Small note about Fider sign-in -->
-        <p class="text-xs text-gray-500 text-center mt-2">
-            (Note: Feedback board requires a separate sign-in on Fider.io)
-        </p>
-
+        
         <!-- Logout Button -->
         <button id="logoutBtn"
-                class="mt-3 w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md">
+                class="mt-3 w-full bg-light_coral-500 hover:bg-light_coral-600 text-gray-800 font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg">
             Log Out
         </button>
+    <!-- Fider Feedback Button -->
+        <button id="openFiderBtn"
+                class="mt-6 w-full bg-mimi-pink hover:bg-lavender-pink text-gray-800 font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg">
+            Feedback & Ideas (Fider.io)
+        </button>
+        <!-- Fider Instruction Manual Container -->
+        <div class="fider-info-container text-xs text-gray-500 text-center mt-2 cursor-pointer">
+            <p>(Note: Feedback board requires a separate sign-in on Fider.io)</p>
+            <div class="fider-instructions p-2 bg-white rounded-lg mt-2 text-left">
+                <p class="font-semibold text-gray-700 mb-1">How to use Fider.io:</p>
+                <ul class="list-disc list-inside space-y-0.5">
+                    <li>Click the "Feedback & Ideas" button.</li>
+                    <li>You will be redirected to the Fider.io board in a new tab.</li>
+                    <li>Sign in or create an account on Fider.io (this is separate from your To-Do app account).</li>
+                    <li>Once logged in, you can submit new ideas, vote on existing ones, and comment.</li>
+                    <li>Your feedback helps improve this app!</li>
+                </ul>
+            </div>
+        </div>
+
+
     </div>
 
     <!-- Custom Message Box for alerts and confirmations -->
     <div id="messageBox" class="modal-overlay hidden">
         <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
             <p id="messageText" class="text-lg font-semibold text-gray-800 mb-4"></p>
-            <button id="messageBoxCloseBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg">
+            <button id="messageBoxCloseBtn" class="bg-lavender-pink hover:bg-mimi-pink text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg">
                 OK
             </button>
         </div>
@@ -190,10 +239,10 @@
         // initializeApp: To initialize the Firebase app.
         // getAuth: To get the authentication service instance.
         // createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendEmailVerification, sendPasswordResetEmail:
-        //    Authentication methods for user management.
+        //      Authentication methods for user management.
         // getFirestore: To get the Firestore database instance.
         // collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, getDocs:
-        //    Firestore methods for database operations (CRUD, real-time listening, querying).
+        //      Firestore methods for database operations (CRUD, real-time listening, querying).
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
         import {
             getAuth,
@@ -513,7 +562,7 @@
             const listItem = document.createElement('li');
             listItem.dataset.id = task.id; // Store Firestore document ID on the element
             listItem.draggable = true; // Enable HTML5 drag-and-drop for this list item
-            listItem.classList.add('flex', 'flex-col', 'sm:flex-row', 'items-start', 'sm:items-center', 'justify-between', 'bg-gray-50', 'p-3', 'rounded-lg', 'shadow-sm', 'transition', 'duration-200', 'ease-in-out', 'group');
+            listItem.classList.add('flex', 'flex-col', 'sm:flex-row', 'items-start', 'sm:items-center', 'justify-between', 'bg-mint-cream', 'p-3', 'rounded-lg', 'shadow-sm', 'transition', 'duration-200', 'ease-in-out', 'group');
 
             // --- Drag and Drop Event Listeners ---
             // Triggered when dragging of the item starts
@@ -533,11 +582,11 @@
                 // Provide visual feedback (top/bottom border) based on where the dragged item is over the target
                 if (e.clientY < offset) {
                     // If cursor is in the top half, indicate drop above
-                    listItem.style.borderTop = '2px solid #60a5fa';
+                    listItem.style.borderTop = '2px solid ' + tailwind.config.theme.extend.colors['non-photo-blue'];
                     listItem.style.borderBottom = 'none';
                 } else {
                     // If cursor is in the bottom half, indicate drop below
-                    listItem.style.borderBottom = '2px solid #60a5fa';
+                    listItem.style.borderBottom = '2px solid ' + tailwind.config.theme.extend.colors['non-photo-blue'];
                     listItem.style.borderTop = 'none';
                 }
             });
@@ -624,14 +673,14 @@
                 const today = new Date();
                 today.setHours(0,0,0,0); // Normalize today's date to midnight for accurate comparison
 
-                let dateClass = 'text-gray-500';
+                let dateClasses = ['text-gray-500']; // Default text color
                 // Apply specific styling for tasks due today or overdue
                 if (fullDueDate.toDateString() === today.toDateString() && !task.completed) {
-                    dateClass = 'text-orange-600 font-semibold'; // Due today and not completed
+                    dateClasses = ['text-lavender-pink', 'font-semibold']; // Due today and not completed
                 } else if (fullDueDate < today && !task.completed) {
-                    dateClass = 'text-red-600 font-semibold'; // Overdue and not completed
+                    dateClasses = ['text-light_coral-500', 'font-semibold']; // Overdue and not completed
                 }
-                dueDateSpan.classList.add(dateClass);
+                dueDateSpan.classList.add(...dateClasses);
                 // Display both date and time
                 dueDateSpan.textContent = `Due: ${fullDueDate.toLocaleDateString()} ${task.dueTime ? fullDueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}`;
                 metaInfoDiv.appendChild(dueDateSpan);
@@ -640,7 +689,7 @@
             // Display Category if available and not empty
             if (task.category && task.category.trim() !== '') {
                 const categorySpan = document.createElement('span');
-                categorySpan.classList.add('bg-blue-100', 'text-blue-800', 'px-2', 'py-0.5', 'rounded-full', 'text-xs', 'font-medium');
+                categorySpan.classList.add('bg-celeste', 'text-gray-800', 'px-2', 'py-0.5', 'rounded-full', 'text-xs', 'font-medium');
                 categorySpan.textContent = task.category;
                 metaInfoDiv.appendChild(categorySpan);
             }
@@ -657,7 +706,7 @@
             // Delete Button
             const deleteBtn = document.createElement('button');
             deleteBtn.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500 hover:text-red-700 transition duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-light_coral-500 hover:text-light_coral-700 transition duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
             `;
