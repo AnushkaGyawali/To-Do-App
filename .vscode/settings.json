@@ -1,0 +1,14 @@
+
+{
+    "CodeGPT.provider": "openai",
+    "CodeGPT.apiKey": "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"
+
+}
+//{
+    //"CodeGPT.provider": "google",
+  //  "CodeGPT.apiKey": "YOUR_GOOGLE_API_KEY"
+//}
+//if you want to use Google as the provider, uncomment the above lines and replace YOUR_GOOGLE_API_KEY with your actual API key.
+//if you want to use OpenAI as the provider, keep the above lines as they are
+//gptapi:"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"
+//google api:"AIzaSyAmC0WX3dvKPrMSt2w-oHorrQJbaFsQHro"
