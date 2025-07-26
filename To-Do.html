@@ -12,7 +12,7 @@
         /* Basic body styling for font and background */
         body {
             font-family: 'Inter', sans-serif;
-            /* background-color is now set via Tailwind class on the body tag (bg-mint-cream) */
+            /* background-color is now set via Tailwind class on the body tag (bg-mint-cream or dark:bg-dark-bg) */
         }
         /* Custom scrollbar for better aesthetics */
         ::-webkit-scrollbar {
@@ -69,15 +69,25 @@
     <!-- Tailwind CSS configuration to extend default colors -->
     <script>
         tailwind.config = {
+            darkMode: 'class', // Enable dark mode based on 'dark' class on HTML
             theme: {
                 extend: {
                     colors: {
-                        // New Palette
+                        // Light Palette
                         'mint-cream': '#eff7f6', // Light, clean background color
                         'lavender-pink': '#f2b5d4', // Primary action color, encouraging tone
                         'mimi-pink': '#f7d6e0', // Secondary elements, subtle highlights
                         'celeste': '#b2f7ef', // Informational text, completed tasks
                         'non-photo-blue': '#7bdff2', // Accent color for focus states and notifications
+
+                        // Dark Palette (newly defined for dark mode)
+                        'dark-bg': '#1a202c', // Main dark background
+                        'dark-card': '#2d3748', // Dark card/container background
+                        'dark-text-primary': '#e2e8f0', // Light text for dark backgrounds
+                        'dark-text-secondary': '#a0aec0', // Lighter text for dark backgrounds
+                        'dark-border': '#4a5568', // Dark border color
+                        'dark-hover': '#4a5568', // Dark hover background
+                        'dark-coral-card': '#5C3A36', // New: Darker coral pink for card backgrounds in dark mode
 
                         // Keeping previous colors for specific uses (like alerts/logout)
                         'light_coral': { DEFAULT: '#f08080', 100: '#420808', 200: '#830f0f', 300: '#c51717', 400: '#e83d3d', 500: '#f08080', 600: '#f39999', 700: '#f6b2b2', 800: '#f9cccc', 900: '#fce5e5' }, // Used for warnings/destructive actions
@@ -85,149 +95,188 @@
                         'melon': { DEFAULT: '#f8ad9d', 100: '#4b1205', 200: '#97240a', 300: '#e23610', 400: '#f36d50', 500: '#f8ad9d', 600: '#f9bdaf', 700: '#fbcdc3', 800: '#fcded7', 900: '#feeeeb' },
                         'apricot': { DEFAULT: '#fbc4ab', 100: '#511c04', 200: '#a23808', 300: '#f3550b', 400: '#f78d5b', 500: '#fbc4ab', 600: '#fcd1bd', 700: '#fddccd', 800: '#fde8de', 900: '#fef3ee' },
                         'light_orange': { DEFAULT: '#ffdab9', 100: '#582900', 200: '#af5200', 300: '#ff7b08', 400: '#ffaa60', 500: '#ffdab9', 600: '#ffe1c6', 700: '#ffe8d4', 800: '#fff0e2', 900: '#fff7f1' },
-                        'baby-powder': '#fffffc', // General light background, similar to white
+                        'baby-powder': '#fffffc',
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4 bg-mint-cream">
-    <!-- Authentication Container: Shown when user is not logged in -->
-    <div id="authContainer" class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md hidden">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Welcome</h1>
-        <p class="text-gray-600 mb-4 text-center">Sign in or create an account to manage your tasks.</p>
-
-        <!-- Email Input Field -->
-        <div class="mb-4">
-            <label for="emailInput" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
-            <input type="email" id="emailInput" placeholder="your@example.com"
-                   class="w-full p-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue text-gray-800 shadow-sm border border-gray-200">
-        </div>
-        <!-- Password Input Field -->
-        <div class="mb-6">
-            <label for="passwordInput" class="block text-gray-700 text-sm font-bold mb-2">Password:</label>
-            <input type="password" id="passwordInput" placeholder="********"
-                   class="w-full p-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue text-gray-800 shadow-sm border border-gray-200">
-        </div>
-
-        <!-- Authentication Buttons -->
-        <div class="flex flex-col space-y-3">
-            <p class="text-center text-sm text-lavender-pink font-medium mb-2">First Time User? Please Press "Sign Up"!</p>
-            <button id="loginBtn"
-                    class="bg-lavender-pink hover:bg-mimi-pink text-gray-800 font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg">
-                Log In
+<body class="flex flex-col items-center min-h-screen bg-mimi-pink dark:bg-dark-bg transition-colors duration-300">
+    <!-- Navigation Bar -->
+    <nav class="w-full bg-coral_pink-800 dark:bg-dark-card p-4 shadow-sm flex justify-between items-center fixed top-0 left-0 z-50 transition-colors duration-300">
+        <h1 class="text-xl font-bold text-gray-800 dark:text-dark-text-primary">Echo-Tasks</h1>
+        <div class="relative">
+            <button id="settingsBtn" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-hover transition-colors duration-200">
+                <!-- Settings Gear Icon (Lucide React equivalent or simple SVG) -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600 dark:text-dark-text-secondary">
+                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.08a2 2 0 0 1 1 1.73v.44a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
             </button>
-            <button id="signupBtn"
-                    class="bg-mimi-pink hover:bg-lavender-pink text-gray-800 font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg">
-                Sign Up
-            </button>
-            <button id="forgotPasswordBtn"
-                    class="text-non-photo-blue hover:text-celeste text-sm mt-2 transition duration-300 ease-in-out hover:underline">
-                Forgot Password?
-            </button>
-        </div>
-    </div>
-
-    <!-- To-Do List Container: Shown when user is logged in -->
-    <div id="todoContainer" class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md hidden">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">My To-Do List</h1>
-
-        <!-- User ID and Email Verification Status Display -->
-        <div class="mb-4 text-center">
-            <div id="userIdDisplay" class="text-sm text-gray-600 mb-1 break-words">
-                Loading user...
-            </div>
-            <!-- Email verification message, hidden by default -->
-            <div id="emailVerificationMessage" class="text-light_coral-500 font-semibold mb-2 hidden">
-                Email not verified. <button id="resendVerificationBtn" class="text-non-photo-blue hover:text-celeste underline">Resend</button>
-            </div>
-        </div>
-
-        <!-- Task Input Section: Includes task text, due date, category, and action buttons -->
-        <div class="flex flex-wrap items-center gap-2 mb-6">
-            <input type="text" id="taskInput" placeholder="Add a new task..."
-                   class="flex-grow p-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue text-gray-800 shadow-sm border border-gray-200">
-            <input type="date" id="dueDateInput"
-                   class="p-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue text-gray-800 shadow-sm border border-gray-200">
-            <input type="time" id="dueTimeInput"
-                   class="p-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue text-gray-800 shadow-sm border border-gray-200">
-            <input type="text" id="categoryInput" placeholder="Category (e.g., Work)"
-                   class="p-3 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue text-gray-800 w-full sm:w-auto shadow-sm border border-gray-200">
-        </div>
-        <div class="flex flex-wrap gap-2 mb-6">
-            <button id="addTaskBtn"
-                    class="flex-grow bg-lavender-pink hover:bg-mimi-pink text-gray-800 font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg">
-                Add Task
-            </button>
-        </div>
-
-        <!-- Filter and Sort Controls -->
-        <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
-            <div class="flex items-center w-full sm:w-auto justify-between sm:justify-start">
-                <label for="filterSelect" class="text-gray-700 mr-2">Show:</label>
-                <select id="filterSelect" class="p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue">
-                    <option value="all">All</option>
-                    <option value="active">Active</option>
-                    <option value="completed">Completed</option>
-                </select>
-            </div>
-            <div class="flex items-center w-full sm:w-auto justify-between sm:justify-start">
-                <label for="sortSelect" class="text-gray-700 mr-2">Sort by:</label>
-                <select id="sortSelect" class="p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue">
-                    <option value="timestamp_asc">Oldest First</option>
-                    <option value="timestamp_desc">Newest First</option>
-                    <option value="dueDate_asc">Due Date (Asc)</option>
-                    <option value="dueDate_desc">Due Date (Desc)</option>
-                    <option value="text_asc">Alphabetical (A-Z)</option>
-                    <option value="text_desc">Alphabetical (Z-A)</option>
-                </select>
+            <!-- Settings Dropdown Menu -->
+            <div id="settingsMenu" class="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-card rounded-lg shadow-lg py-2 hidden z-50 transition-colors duration-300">
+                <button id="darkModeToggleBtn" class="w-full text-left px-4 py-2 text-gray-800 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-hover flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon text-gray-600 dark:text-dark-text-secondary">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                    </svg>
+                    <span>Light/Dark Mode</span>
+                </button>
+                <button id="passwordChangeBtn" class="w-full text-left px-4 py-2 text-gray-800 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-hover flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key text-gray-600 dark:text-dark-text-secondary">
+                        <path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.778-7.778z"/><path d="m15.5 6.5 3.5-3.5L22 7l-3.5 3.5"/><path d="M12 12 2 22Z"/>
+                    </svg>
+                    <span>Change Password</span>
+                </button>
+                <button id="addProfileInfoBtn" class="w-full text-left px-4 py-2 text-gray-800 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-hover flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus text-gray-600 dark:text-dark-text-secondary">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/>
+                    </svg>
+                    <span>Add Profile Info</span>
+                </button>
+                <button id="exportDataBtn" class="w-full text-left px-4 py-2 text-gray-800 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-hover flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download text-gray-600 dark:text-dark-text-secondary">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>
+                    </svg>
+                    <span>Export Data (PDF)</span>
+                </button>
+                <!-- Moved Feedback Button to Settings Menu -->
+                <button id="openFiderBtn"
+                        class="w-full text-left px-4 py-2 text-gray-800 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-hover flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square text-gray-600 dark:text-dark-text-secondary">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <span>Feedback & Ideas</span>
+                </button>
+                <!-- Moved Logout Button to Settings Menu -->
+                <button id="logoutBtn"
+                        class="w-full text-left px-4 py-2 text-light_coral-500 hover:bg-red-50 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out text-light_coral-500">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="17 16 22 12 17 8"/><line x1="22" x2="11" y1="12" y2="12"/>
+                    </svg>
+                    <span>Log Out</span>
+                </button>
+                <button id="deleteAccountBtn" class="w-full text-left px-4 py-2 text-light_coral-500 hover:bg-red-50 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2 text-light_coral-500">
+                        <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>
+                    </svg>
+                    <span>Delete Account</span>
+                </button>
             </div>
         </div>
+    </nav>
+    <main class="flex-grow flex items-center justify-center w-full mt-20 p-4"> <!-- Added mt-20 to push content below fixed navbar -->
+        <!-- Authentication Container: Shown when user is not logged in -->
+        <div id="authContainer" class="bg-coral_pink-800 dark:bg-dark-coral-card p-6 rounded-xl shadow-lg w-full max-w-md hidden transition-colors duration-300">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-dark-text-primary mb-6 text-center">Welcome</h1>
+            <p class="text-gray-600 dark:text-dark-text-secondary mb-4 text-center">Sign in or create an account to manage your tasks.</p>
 
-        <!-- Task List: Where tasks are dynamically rendered -->
-        <ul id="taskList" class="space-y-3">
-            <!-- Tasks will be dynamically added here by JavaScript -->
-        </ul>
+            <!-- Email Input Field -->
+            <div class="mb-4">
+                <label for="emailInput" class="block text-gray-700 dark:text-dark-text-secondary text-sm font-bold mb-2">Email:</label>
+                <input type="email" id="emailInput" placeholder="your@example.com"
+                       class="w-full p-3 bg-melon dark:bg-melon rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue text-gray-800 dark:text-dark-text-primary shadow-sm border border-gray-200 dark:border-dark-border">
+            </div>
+            <!-- Password Input Field -->
+            <div class="mb-6">
+                <label for="passwordInput" class="block text-gray-700 dark:text-dark-text-secondary text-sm font-bold mb-2">Password:</label>
+                <input type="password" id="passwordInput" placeholder="********"
+                       class="w-full p-3 bg-melon dark:bg-melon rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue text-gray-800 dark:text-dark-text-primary shadow-sm border border-gray-200 dark:border-dark-border">
+            </div>
 
-        <!-- Loading Indicator for tasks -->
-        <div id="loadingIndicator" class="text-center text-gray-500 mt-4 hidden">
-            Loading tasks...
-        </div>
-
-        
-        <!-- Logout Button -->
-        <button id="logoutBtn"
-                class="mt-3 w-full bg-light_coral-500 hover:bg-light_coral-600 text-gray-800 font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg">
-            Log Out
-        </button>
-    <!-- Fider Feedback Button -->
-        <button id="openFiderBtn"
-                class="mt-6 w-full bg-mimi-pink hover:bg-lavender-pink text-gray-800 font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg">
-            Feedback & Ideas (Fider.io)
-        </button>
-        <!-- Fider Instruction Manual Container -->
-        <div class="fider-info-container text-xs text-gray-500 text-center mt-2 cursor-pointer">
-            <p>(Note: Feedback board requires a separate sign-in on Fider.io)</p>
-            <div class="fider-instructions p-2 bg-white rounded-lg mt-2 text-left">
-                <p class="font-semibold text-gray-700 mb-1">How to use Fider.io:</p>
-                <ul class="list-disc list-inside space-y-0.5">
-                    <li>Click the "Feedback & Ideas" button.</li>
-                    <li>You will be redirected to the Fider.io board in a new tab.</li>
-                    <li>Sign in or create an account on Fider.io (this is separate from your To-Do app account).</li>
-                    <li>Once logged in, you can submit new ideas, vote on existing ones, and comment.</li>
-                    <li>Your feedback helps improve this app!</li>
-                </ul>
+            <!-- Authentication Buttons -->
+            <div class="flex flex-col space-y-3">
+                <p class="text-center text-sm text-lavender-pink font-medium mb-2">First Time User? Please Press "Sign Up"!</p>
+                <button id="loginBtn"
+                        class="bg-lavender-pink hover:bg-mimi-pink text-gray-800 font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg">
+                    Log In
+                </button>
+                <button id="signupBtn"
+                        class="bg-mimi-pink hover:bg-lavender-pink text-gray-800 font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg">
+                    Sign Up
+                </button>
+                <button id="forgotPasswordBtn"
+                        class="text-non-photo-blue hover:text-celeste text-sm mt-2 transition duration-300 ease-in-out hover:underline">
+                    Forgot Password?
+                </button>
             </div>
         </div>
 
+        <!-- To-Do List Container: Shown when user is logged in -->
+        <div id="todoContainer" class="bg-coral_pink-800 dark:bg-dark-coral-card p-6 rounded-xl shadow-lg w-full max-w-md hidden transition-colors duration-300">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-dark-text-primary mb-6 text-center">My To-Do List</h1>
 
-    </div>
+            <!-- User ID and Email Verification Status Display -->
+            <div class="mb-4 text-center">
+                <div id="userIdDisplay" class="text-sm text-gray-600 dark:text-dark-text-secondary mb-1 break-words">
+                    Loading user...
+                </div>
+                <!-- Email verification message, hidden by default -->
+                <div id="emailVerificationMessage" class="text-light_coral-500 font-semibold mb-2 hidden">
+                    Email not verified. <button id="resendVerificationBtn" class="text-non-photo-blue hover:text-celeste underline">Resend</button>
+                </div>
+            </div>
+
+            <!-- Task Input Section: Includes task text, due date, category, and action buttons -->
+            <div class="flex flex-wrap items-center gap-2 mb-6">
+                <input type="text" id="taskInput" placeholder="Add a new task..."
+                       class="flex-grow p-3 bg-melon dark:bg-melon rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue text-gray-800 dark:text-dark-text-primary shadow-sm border border-gray-200 dark:border-dark-border">
+                <input type="date" id="dueDateInput"
+                       class="p-3 bg-melon dark:bg-melon rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue text-gray-800 shadow-sm border border-gray-200">
+                <input type="time" id="dueTimeInput"
+                       class="p-3 bg-melon dark:bg-melon rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue text-gray-800 shadow-sm border border-gray-200">
+                <input type="text" id="categoryInput" placeholder="Category (e.g., Work)"
+                       class="p-3 bg-melon dark:bg-melon rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue text-gray-800 dark:text-dark-text-primary w-full sm:w-auto shadow-sm border border-gray-200 dark:border-dark-border">
+            </div>
+            <div class="flex flex-wrap gap-2 mb-6">
+                <button id="addTaskBtn"
+                        class="flex-grow bg-lavender-pink hover:bg-mimi-pink text-gray-800 font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg">
+                    Add Task
+                </button>
+            </div>
+
+            <!-- Filter and Sort Controls -->
+            <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+                <div class="flex items-center w-full sm:w-auto justify-between sm:justify-start">
+                    <label for="filterSelect" class="text-gray-700 dark:text-dark-text-secondary mr-2">Show:</label>
+                    <select id="filterSelect" class="p-2 border border-gray-200 dark:border-dark-border rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue bg-melon dark:bg-melon text-gray-800 dark:text-dark-text-primary">
+                        <option value="all">All</option>
+                        <option value="active">Active</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="flex items-center w-full sm:w-auto justify-between sm:justify-start">
+                    <label for="sortSelect" class="text-gray-700 dark:text-dark-text-secondary mr-2">Sort by:</label>
+                    <select id="sortSelect" class="p-2 border border-gray-200 dark:border-dark-border rounded-lg focus:outline-none focus:ring-2 focus:ring-non-photo-blue bg-melon dark:bg-melon text-gray-800 dark:text-dark-text-primary">
+                        <option value="timestamp_asc">Oldest First</option>
+                        <option value="timestamp_desc">Newest First</option>
+                        <option value="dueDate_asc">Due Date (Asc)</option>
+                        <option value="dueDate_desc">Due Date (Desc)</option>
+                        <option value="text_asc">Alphabetical (A-Z)</option>
+                        <option value="text_desc">Alphabetical (Z-A)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Task List: Where tasks are dynamically rendered -->
+            <ul id="taskList" class="space-y-3">
+                <!-- Tasks will be dynamically added here by JavaScript -->
+            </ul>
+
+            <!-- Loading Indicator for tasks -->
+            <div id="loadingIndicator" class="text-center text-gray-500 dark:text-dark-text-secondary mt-4 hidden">
+                Loading tasks...
+            </div>
+
+            
+            <!-- Logout Button (Removed from here, moved to settings) -->
+        </div>
+    </main>
 
     <!-- Custom Message Box for alerts and confirmations -->
     <div id="messageBox" class="modal-overlay hidden">
-        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
-            <p id="messageText" class="text-lg font-semibold text-gray-800 mb-4"></p>
+        <div class="bg-white dark:bg-dark-card p-6 rounded-lg shadow-xl max-w-sm w-full text-center transition-colors duration-300">
+            <p id="messageText" class="text-lg font-semibold text-gray-800 dark:text-dark-text-primary mb-4"></p>
             <button id="messageBoxCloseBtn" class="bg-lavender-pink hover:bg-mimi-pink text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg">
                 OK
             </button>
@@ -251,7 +300,8 @@
             onAuthStateChanged,
             signOut,
             sendEmailVerification,
-            sendPasswordResetEmail
+            sendPasswordResetEmail,
+            deleteUser // Import deleteUser for account deletion
         } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
         import {
             getFirestore,
@@ -317,13 +367,21 @@
         const emailVerificationMessage = document.getElementById('emailVerificationMessage');
         const resendVerificationBtn = document.getElementById('resendVerificationBtn');
         const loadingIndicator = document.getElementById('loadingIndicator');
-        const logoutBtn = document.getElementById('logoutBtn');
+        // const logoutBtn = document.getElementById('logoutBtn'); // Moved to settings menu
         const filterSelect = document.getElementById('filterSelect');
         const sortSelect = document.getElementById('sortSelect');
 
-        // New: Fider Integration Elements
-        const openFiderBtn = document.getElementById('openFiderBtn');
-        // Removed: fiderModal and closeFiderModalBtn as they are no longer needed for iframe embedding
+        // New DOM elements for Navbar and Settings
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsMenu = document.getElementById('settingsMenu');
+        const darkModeToggleBtn = document.getElementById('darkModeToggleBtn');
+        const passwordChangeBtn = document.getElementById('passwordChangeBtn');
+        const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+        const addProfileInfoBtn = document.getElementById('addProfileInfoBtn');
+        const exportDataBtn = document.getElementById('exportDataBtn');
+        const openFiderBtn = document.getElementById('openFiderBtn'); // Now in settings menu
+        const logoutBtn = document.getElementById('logoutBtn'); // Now in settings menu
+
 
         // Message Box Elements
         const messageBox = document.getElementById('messageBox');
@@ -332,6 +390,8 @@
 
         // Drag and drop variables
         let draggedItem = null; // Stores the HTML element currently being dragged
+
+        let isDarkMode = false; // State for dark mode
 
         /**
          * @function showMessageBox
@@ -353,6 +413,136 @@
         messageBoxCloseBtn.addEventListener('click', () => {
             messageBox.classList.add('hidden'); // Hide the message box
         });
+
+        /**
+         * @function toggleSettingsMenu
+         * @description Toggles the visibility of the settings dropdown menu.
+         */
+        function toggleSettingsMenu() {
+            settingsMenu.classList.toggle('hidden');
+        }
+
+        /**
+         * @function toggleDarkMode
+         * @description Toggles between light and dark mode for the application.
+         * It adds or removes the 'dark' class from the `<html>` element and saves the preference to localStorage.
+         */
+        function toggleDarkMode() {
+            const htmlElement = document.documentElement;
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                isDarkMode = false;
+            } else {
+                htmlElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                isDarkMode = true;
+            }
+            settingsMenu.classList.add('hidden'); // Close menu after selection
+        }
+
+        /**
+         * @function applySavedTheme
+         * @description Applies the theme saved in localStorage when the page loads.
+         */
+        function applySavedTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                isDarkMode = true;
+            } else {
+                document.documentElement.classList.remove('dark');
+                isDarkMode = false;
+            }
+        }
+
+        /**
+         * @function handlePasswordChange
+         * @description Placeholder for password change functionality.
+         * In a real app, this would typically redirect to a password reset flow or a dedicated profile page.
+         */
+        function handlePasswordChange() {
+            showMessageBox("To change your password, please use the 'Forgot Password?' link on the login page. This ensures a secure process.");
+            settingsMenu.classList.add('hidden'); // Close menu
+        }
+
+        /**
+         * @function handleDeleteAccount
+         * @description Placeholder for account deletion functionality.
+         * Account deletion requires re-authentication for security.
+         */
+        async function handleDeleteAccount() {
+            if (!currentUser) {
+                showMessageBox("You must be logged in to delete your account.");
+                settingsMenu.classList.add('hidden');
+                return;
+            }
+
+            showMessageBox("For security, you need to re-authenticate to delete your account. Please log out and log back in, then try deleting your account again.");
+            settingsMenu.classList.add('hidden'); // Close menu
+
+            // In a full implementation, you'd typically prompt for re-authentication here,
+            // then call `deleteUser(currentUser)`.
+            // Example:
+            // try {
+            //     await reauthenticateWithCredential(currentUser, credential); // Get credential from user input
+            //     await deleteUser(currentUser);
+            //     showMessageBox("Your account has been successfully deleted.");
+            // } catch (error) {
+            //     console.error("Error deleting account:", error);
+            //     showMessageBox("Failed to delete account. Please re-authenticate and try again.");
+            // }
+        }
+
+        /**
+         * @function handleAddProfileInfo
+         * @description Placeholder for adding/editing profile information.
+         */
+        function handleAddProfileInfo() {
+            showMessageBox("This feature is under development. You will be able to add profile information here soon!");
+            settingsMenu.classList.add('hidden'); // Close menu
+        }
+
+        /**
+         * @function handleExportData
+         * @description Placeholder for exporting user data (e.g., tasks) to PDF.
+         * This would involve fetching all user tasks and then using a library (e.g., jsPDF) to generate a PDF.
+         */
+        async function handleExportData() {
+            if (!db || !userId || !isAuthReady) {
+                showMessageBox("Please log in to export your data.");
+                settingsMenu.classList.add('hidden');
+                return;
+            }
+
+            showMessageBox("Exporting data to PDF is under development. This feature will be available soon!");
+            settingsMenu.classList.add('hidden'); // Close menu
+
+            // Example of how you might fetch data for export:
+            // try {
+            //     const tasksSnapshot = await getDocs(collection(db, `artifacts/${appId}/users/${userId}/tasks`));
+            //     const tasksToExport = [];
+            //     tasksSnapshot.forEach(doc => {
+            //         tasksToExport.push(doc.data());
+            //     });
+            //     console.log("Tasks for export:", tasksToExport);
+            //     // Here you would integrate a PDF generation library like jsPDF
+            //     // For example:
+            //     // const doc = new jsPDF();
+            //     // doc.text("My To-Do List", 10, 10);
+            //     // let y = 20;
+            //     // tasksToExport.forEach((task, index) => {
+            //     //     doc.text(`${index + 1}. ${task.text} (Due: ${task.dueDate || 'N/A'})`, 10, y);
+            //     //     y += 10;
+            //     // });
+            //     // doc.save("my-todo-list.pdf");
+            //     // showMessageBox("Your To-Do List has been exported as PDF!");
+            // } catch (error) {
+            //     console.error("Error exporting data:", error);
+            //     showMessageBox("Failed to export data. Please try again.");
+            // }
+        }
+
 
         /**
          * @function initializeFirebase
@@ -562,7 +752,7 @@
             const listItem = document.createElement('li');
             listItem.dataset.id = task.id; // Store Firestore document ID on the element
             listItem.draggable = true; // Enable HTML5 drag-and-drop for this list item
-            listItem.classList.add('flex', 'flex-col', 'sm:flex-row', 'items-start', 'sm:items-center', 'justify-between', 'bg-mint-cream', 'p-3', 'rounded-lg', 'shadow-sm', 'transition', 'duration-200', 'ease-in-out', 'group');
+            listItem.classList.add('flex', 'flex-col', 'sm:flex-row', 'items-start', 'sm:items-center', 'justify-between', 'bg-mint-cream', 'dark:bg-dark-bg', 'p-3', 'rounded-lg', 'shadow-sm', 'transition', 'duration-200', 'ease-in-out', 'group');
 
             // --- Drag and Drop Event Listeners ---
             // Triggered when dragging of the item starts
@@ -638,13 +828,13 @@
             // Task Text Span: Displays the task description
             const taskTextSpan = document.createElement('span');
             taskTextSpan.textContent = task.text;
-            taskTextSpan.classList.add('text-gray-700', 'text-lg', 'cursor-pointer', 'min-w-0', 'break-words');
+            taskTextSpan.classList.add('text-gray-700', 'dark:text-dark-text-secondary', 'text-lg', 'cursor-pointer', 'min-w-0', 'break-words');
             taskTextSpan.contentEditable = true; // Make the text directly editable in the UI
             taskTextSpan.spellcheck = false; // Disable browser spellcheck for this editable field
 
             // Apply line-through style if task is completed
             if (task.completed) {
-                taskTextSpan.classList.add('line-through', 'text-gray-500');
+                taskTextSpan.classList.add('line-through', 'text-gray-500', 'dark:text-gray-400');
             }
 
             // Event listeners for editing task text
@@ -663,7 +853,7 @@
 
             // Meta Information Div: Contains due date and category
             const metaInfoDiv = document.createElement('div');
-            metaInfoDiv.classList.add('flex', 'items-center', 'text-sm', 'text-gray-500', 'gap-2', 'flex-wrap');
+            metaInfoDiv.classList.add('flex', 'items-center', 'text-sm', 'text-gray-500', 'dark:text-dark-text-secondary', 'gap-2', 'flex-wrap');
 
             // Display Due Date and Time if available
             if (task.dueDate) {
@@ -710,7 +900,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
             `;
-            deleteBtn.classList.add('p-1', 'rounded-full', 'hover:bg-gray-200');
+            deleteBtn.classList.add('p-1', 'rounded-full', 'hover:bg-gray-200', 'dark:hover:bg-dark-hover');
             deleteBtn.title = "Delete Task";
             deleteBtn.addEventListener('click', () => deleteTask(task.id)); // Attach delete functionality
 
@@ -987,7 +1177,7 @@
          * @function handleForgotPassword
          * @description Sends a password reset email to the provided email address using Firebase Authentication.
          * This allows users to regain access to their account if they forget their password.
-         * @returns {Promise<void>}
+         * @returns {void}
          */
         async function handleForgotPassword() {
             const email = emailInput.value;
@@ -1072,7 +1262,7 @@
          * @description Event listener for the "Log Out" button click.
          * Calls the `handleLogout` function to sign out the current user.
          */
-        logoutBtn.addEventListener('click', handleLogout);
+        // logoutBtn.addEventListener('click', handleLogout); // Now attached in settings section
 
         /**
          * @description Event listener for the "Forgot Password?" button click.
@@ -1108,9 +1298,9 @@
          * @description Event listener for the "Feedback & Ideas" button to open the Fider board in a new tab.
          * This approach avoids third-party cookie issues encountered with iframes.
          */
-        openFiderBtn.addEventListener('click', () => {
-            window.open('https://echotasks.fider.io/', '_blank'); // Opens Fider in a new tab
-        });
+        // openFiderBtn.addEventListener('click', () => { // Now attached in settings section
+        //     window.open('https://echotasks.fider.io/', '_blank'); // Opens Fider in a new tab
+        // });
 
         /**
          * @description Event listener for the email input field's `keypress` event.
@@ -1131,6 +1321,31 @@
                 handleLogin(); // Attempt to log in
             }
         });
+
+        // Event Listeners for new Navbar and Settings
+        settingsBtn.addEventListener('click', toggleSettingsMenu);
+        darkModeToggleBtn.addEventListener('click', toggleDarkMode);
+        passwordChangeBtn.addEventListener('click', handlePasswordChange);
+        deleteAccountBtn.addEventListener('click', handleDeleteAccount);
+        addProfileInfoBtn.addEventListener('click', handleAddProfileInfo);
+        exportDataBtn.addEventListener('click', handleExportData);
+        openFiderBtn.addEventListener('click', () => { // Re-attached here as it's now a menu item
+            window.open('https://echotasks.fider.io/', '_blank'); // Opens Fider in a new tab
+            settingsMenu.classList.add('hidden'); // Close menu after opening new tab
+        });
+        logoutBtn.addEventListener('click', handleLogout); // Re-attached here as it's now a menu item
+
+
+        // Close settings menu if clicking outside
+        document.addEventListener('click', (event) => {
+            // Check if the click was outside the settings button and the settings menu itself
+            if (!settingsMenu.contains(event.target) && !settingsBtn.contains(event.target) && !settingsMenu.classList.contains('hidden')) {
+                settingsMenu.classList.add('hidden');
+            }
+        });
+
+        // Apply saved theme on initial load
+        applySavedTheme();
 
         /**
          * @description Initializes Firebase and sets up the authentication listener

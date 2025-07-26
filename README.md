@@ -1,84 +1,115 @@
-📝 To-Do List App
-A clean, simple, and persistent To-Do List application built with vanilla JavaScript, HTML, and Tailwind CSS, leveraging Firebase Firestore for real-time data synchronization. This application allows users to effectively manage their daily tasks.
-Live Demo:https://echotasks.netlify.app/
-✨ Features
-Add Tasks: Easily add new tasks to your list using the input field.
+# 📝 To-Do List App
 
-Mark as Complete: Toggle the completion status of tasks by clicking on their text. Completed tasks are visually struck through.
+A clean, simple, and persistent To-Do List application built with **vanilla JavaScript**, **HTML**, and **Tailwind CSS**, leveraging **Firebase Firestore** for real-time data synchronization. This application allows users to effectively manage their daily tasks.
 
-Delete Tasks: Remove tasks from your list with a dedicated delete button.
+### 🔗 Live Demo:
 
-Persistent Storage: All your tasks are automatically saved and loaded from Firebase Firestore, ensuring your data is retained even if you close the browser or access the app from a different device.
+[https://echotasks.netlify.app/](https://echotasks.netlify.app/)
 
-Real-time Updates: Changes made to your tasks (adding, completing, deleting) are instantly reflected across all active sessions, thanks to Firestore's real-time listeners.
+---
 
-Responsive Design: The user interface is designed to be responsive, providing an optimal viewing and interaction experience on various devices (desktops, tablets, and mobile phones).
+## ✨ Features
 
-Unique User Identification: The application displays a unique user ID, which is automatically generated or provided by the environment, allowing for distinct user data storage.
+* **Add Tasks**: Easily add new tasks using the input field.
+* **Mark as Complete**: Toggle the completion status by clicking on a task. Completed tasks are struck through.
+* **Delete Tasks**: Remove tasks with a dedicated delete button.
+* **Persistent Storage**: Tasks are saved and loaded from Firebase Firestore, persisting across sessions and devices.
+* **Real-time Updates**: All task changes are reflected instantly across all active sessions.
+* **Responsive Design**: Optimized UI for desktops, tablets, and mobile phones.
+* **Unique User Identification**: Automatically assigns a unique User ID to each session for personalized data storage.
 
-🚀 Technologies Used
-HTML5: For the basic structure and content of the web page.
+---
 
-Tailwind CSS: A utility-first CSS framework used for rapid and responsive UI development, providing a clean and modern look.
+## 🚀 Technologies Used
 
-Vanilla JavaScript: Powers the application's logic, including DOM manipulation, event handling, and integration with Firebase.
+| Tool/Technology             | Purpose                                                       |
+| --------------------------- | ------------------------------------------------------------- |
+| **HTML5**                   | Web page structure                                            |
+| **Tailwind CSS**            | Utility-first styling for responsive and modern UI            |
+| **Vanilla JavaScript**      | Logic, DOM manipulation, event handling, Firebase integration |
+| **Firebase Firestore**      | Real-time NoSQL database for storing tasks                    |
+| **Firebase Authentication** | Anonymous sign-in for managing user-specific task data        |
 
-Firebase Firestore: A NoSQL cloud database used for storing and synchronizing task data in real-time.
+---
 
-Firebase Authentication: Used for anonymous authentication to manage user-specific data without requiring sign-ups.
+## ⚙️ Setup and Installation
 
-⚙️ Setup and Installation
-This application is a single HTML file, making it very easy to set up and run.
+> This application is contained within a single HTML file.
 
-Save the File:
+### 1. Save the File
 
-Copy the entire code block provided (from <!DOCTYPE html> to </html>).
+* Copy the full code (starting from `<!DOCTYPE html>` to `</html>`).
+* Paste into a plain text editor (e.g., VS Code, Notepad).
+* Save the file with a `.html` extension (e.g., `todo_list.html`).
 
-Paste it into a plain text editor (e.g., Notepad, VS Code, Sublime Text).
+### 2. Open in Browser
 
-Save the file with an .html extension (e.g., todo_list.html). Make sure to select "All Files" or "Plain Text" as the file type if prompted, to ensure the .html extension is applied correctly.
+* Navigate to the saved file location.
+* Double-click to open in your default web browser.
 
-Open in Browser:
+### 🔐 Firebase Configuration Notes
 
-Navigate to the saved todo_list.html file on your computer.
+This app expects Firebase config variables to be available globally as:
 
-Double-click the file to open it in your default web browser.
+```js
+__app_id, __firebase_config, __initial_auth_token
+```
 
-Note on Firebase Configuration:
-This application is designed to work within an environment that provides Firebase configuration variables (__app_id, __firebase_config, __initial_auth_token). When running locally, if these variables are not defined, the app will use default values and attempt anonymous sign-in. For a production environment or custom Firebase project, you would typically replace these global variables with your actual Firebase project's configuration details.
+If not defined, the app will default to anonymous sign-in using a fallback config. For production use, replace these with your actual Firebase project credentials.
 
-💡 Usage
-Add a Task: Type your task into the input field and click the "Add" button, or press Enter.
+---
 
-Mark as Complete/Incomplete: Click on the text of any task to toggle its completion status.
+## 💡 Usage
 
-Delete a Task: Click the trash can icon next to a task to permanently remove it from your list.
+* **Add Task**: Type in the input box and press Enter or click **Add**.
+* **Toggle Completion**: Click on the task text to mark as complete/incomplete.
+* **Delete Task**: Click the trash icon beside a task.
+* **User ID**: Displayed at the top; used to manage user-specific Firestore data.
 
-User ID: Your unique User ID is displayed at the top of the application. This ID is used to store your tasks separately in the database.
+---
 
-📊 Firestore Data Structure
-Tasks are stored in Firestore under a collection path structured as:
+## 📊 Firestore Data Structure
+
+Firestore stores data in the path:
+
+```
 artifacts/{appId}/users/{userId}/tasks
+```
 
-Each task document contains the following fields:
+Each task document includes:
 
-text (string): The description of the task.
+* `text` *(string)*: Task description
+* `completed` *(boolean)*: Completion status
+* `timestamp` *(timestamp)*: Created date/time (used for sorting)
 
-completed (boolean): Indicates whether the task is completed (true) or not (false).
+---
 
-timestamp (timestamp): The time when the task was created, used for sorting tasks.
+## 🛠️ Future Enhancements
 
-🛠️ Future Enhancements
-Editing Tasks: Add functionality to edit existing task descriptions.
+* **Editing Tasks**: Inline task editing capability.
+* **Filtering/Sorting**: Show only completed/active tasks, or sort alphabetically or by date.
+* **Due Dates**: Add due date input and reminders.
+* **Tags/Categories**: Organize tasks using labels.
+* **Email/Google Sign-In**: Expand authentication beyond anonymous sign-in.
+* **Drag-and-Drop Reordering**: Let users manually sort tasks.
+* **Public/Shared Lists**: Enable users to share task lists with others.
 
-Filtering/Sorting: Implement options to filter tasks (e.g., show only active, only completed) or sort them by different criteria (e.g., alphabetically, by due date).
+---
 
-Due Dates: Add a field for due dates and reminders.
+## 📄 License
 
-Categories/Tags: Allow users to categorize or tag tasks for better organization.
+This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)** license.
 
-User Authentication (Email/Password, Google Sign-in): Implement more robust authentication methods instead of anonymous sign-in.
+You are free to:
 
-Drag-and-Drop Reordering: Allow users to reorder tasks by dragging and dropping them.
+* Share — copy and redistribute the material in any medium or format
+* Adapt — remix, transform, and build upon the material
 
-Public/Shared Lists: Extend the functionality to allow users to create and share public task lists.
+Under the following terms:
+
+* **Attribution** — You must give appropriate credit.
+* **NonCommercial** — You may not use the material for commercial purposes.
+
+To view a copy of this license, visit: [https://creativecommons.org/licenses/by-nc/4.0/](https://creativecommons.org/licenses/by-nc/4.0/)
+
+Commercial use is strictly prohibited.
