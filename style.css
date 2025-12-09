@@ -1,0 +1,493 @@
+/* --- CSS Variables & Theme Setup --- */
+:root {
+    /* Fonts */
+    --font-main: 'Inter', sans-serif;
+
+    /* Light Mode Palette */
+    --bg-color: #F3C6F2;
+    --card-bg: #EFA6B6;
+    --primary: #7554AE;
+    --secondary: #A98FE8;
+    --accent: #7554AE;
+    --text-main: #381D2A;
+    --text-muted: #381D2A; /* Using main for muted in light, or slightly lighter opacity */
+    --border-color: #e5e7eb;
+    --danger: #f08080;
+    --danger-hover: #c51717;
+
+    /* Dimensions & Spacing */
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --nav-height: 80px;
+}
+
+/* Dark Mode Overrides */
+html.dark {
+    --bg-color: #21153B;
+    --card-bg: #4A2C4F;
+    --primary: #7554AE;
+    --secondary: #BD98E0; /* dark-pastel-secondary */
+    --accent: #BD98E0;    /* dark-pastel-accent */
+    --text-main: #FFFFFF;
+    --text-muted: #BD98E0;
+    --border-color: #374151;
+    --danger: #f08080;
+}
+
+/* --- Reset & Base Styles --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #e0e0e0;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* --- Layout --- */
+.app-nav {
+    width: 100%;
+    background-color: var(--bg-color);
+    padding: 1rem;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 50;
+    transition: background-color 0.3s ease;
+}
+
+.nav-title {
+    flex-grow: 1;
+    text-align: center;
+}
+
+.nav-title h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    display: inline-block;
+}
+
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 5rem; /* Space for fixed nav */
+    padding: 1rem;
+}
+
+/* --- Components --- */
+
+/* Buttons */
+.btn-icon {
+    padding: 0.5rem;
+    border-radius: 9999px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-main);
+    transition: background-color 0.2s;
+}
+
+.btn-icon:hover {
+    background-color: var(--secondary);
+}
+
+.btn-primary, .btn-secondary {
+    width: 100%; /* Default full width */
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 0.5rem;
+}
+
+.btn-primary:hover, .btn-secondary:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: #fff; /* Always white on primary */
+}
+/* Ensure text matches logical palette if specific override needed */
+.light .btn-primary { color: var(--text-main); } 
+
+.btn-primary:hover {
+    background-color: var(--secondary);
+}
+
+.btn-secondary {
+    background-color: var(--secondary);
+    color: var(--text-main);
+}
+
+.btn-secondary:hover {
+    background-color: var(--primary);
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 0.875rem;
+    cursor: pointer;
+    text-decoration: none;
+}
+.btn-link:hover {
+    text-decoration: underline;
+}
+
+/* Dropdown Menu */
+.relative-container {
+    position: relative;
+}
+
+.dropdown-menu {
+    position: absolute;
+    right: 0;
+    margin-top: 0.5rem;
+    width: 12rem;
+    background-color: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 0.5rem 0;
+    z-index: 50;
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-item {
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 1rem;
+    background: none;
+    border: none;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.dropdown-item:hover {
+    background-color: var(--secondary);
+}
+
+/* Cards (Auth & Todo Containers) */
+.card-container {
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 28rem; /* Equivalent to max-w-md */
+    transition: background-color 0.3s ease;
+}
+
+.card-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.card-subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+/* Inputs */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.input-base {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    color: var(--text-main);
+    box-shadow: var(--shadow-sm);
+    font-size: 1rem;
+}
+
+.input-base:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent);
+}
+
+[contenteditable]:focus {
+    outline: 2px solid var(--accent);
+    border-radius: 0.25rem;
+    padding: 0.25rem;
+}
+
+/* Task List Specifics */
+.input-group-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+}
+
+.input-grow {
+    flex-grow: 1;
+}
+
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 0.5rem;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.filter-select {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background-color: var(--bg-color);
+    color: var(--text-main);
+}
+.filter-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent);
+}
+
+.task-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Individual Task Item Styling */
+.task-item {
+    display: flex;
+    flex-direction: column; /* Default mobile */
+    align-items: flex-start;
+    background-color: var(--bg-color);
+    padding: 0.75rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease-in-out;
+    cursor: grab;
+}
+
+.task-item.dragging {
+    opacity: 0.5;
+    border: 2px dashed var(--accent);
+}
+
+.task-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.task-text {
+    font-size: 1.125rem;
+    cursor: pointer;
+    word-break: break-word;
+    color: var(--text-main);
+}
+
+.task-text.completed {
+    text-decoration: line-through;
+    color: #6b7280; /* Gray 500 equivalent */
+}
+
+/* Dark mode specific for completed text */
+html.dark .task-text.completed {
+    color: #9ca3af; /* Gray 400 */
+}
+
+.task-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+}
+
+.category-tag {
+    background-color: var(--accent);
+    color: #fff; /* Ensure contrast on accent */
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+html.dark .category-tag {
+    color: var(--bg-color); /* Dark text on light accent in dark mode? Or adjust */
+    color: #fff;
+}
+
+
+.task-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+    color: var(--danger);
+}
+
+.btn-delete:hover {
+    background-color: #e5e7eb;
+    color: var(--danger-hover);
+}
+html.dark .btn-delete:hover {
+    background-color: var(--secondary);
+}
+
+.text-danger { color: var(--danger); }
+.text-due-today { color: var(--primary); font-weight: 600; }
+html.dark .text-due-today { color: var(--secondary); }
+
+/* --- Modals & Overlays --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-width: 24rem;
+    width: 100%;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+/* Fider Specifics */
+.fider-button-wrapper:hover .fider-instructions-dropdown {
+    max-height: 150px;
+    opacity: 1;
+    transition: max-height 0.3s ease-in, opacity 0.3s ease-in;
+}
+.fider-instructions-dropdown {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+    padding-top: 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.25;
+    color: var(--text-muted);
+}
+.fider-list {
+    list-style-type: disc;
+    list-style-position: inside;
+}
+
+/* --- Utilities --- */
+.hidden { display: none !important; }
+.flex { display: flex; }
+.text-center { text-align: center; }
+.w-full { width: 100%; }
+.mt-2 { margin-top: 0.5rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.gap-2 { gap: 0.5rem; }
+
+/* Responsive Media Queries (Mimicking sm:) */
+@media (min-width: 640px) {
+    .task-item {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .task-content {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0;
+    }
+    .filter-group {
+        width: auto;
+        justify-content: flex-start;
+    }
+    .input-base.auto-width {
+        width: auto;
+    }
+    .task-actions {
+        margin-left: 1rem;
+    }
+}

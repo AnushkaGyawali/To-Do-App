@@ -5,148 +5,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced To-Do List App</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Removed Tailwind CDN -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        /* Basic body styling for font and background */
-        body {
-            font-family: 'Inter', sans-serif;
-            /* background-color is now set via Tailwind class on the body tag (bg-pastel-bg-light or dark:bg-dark-pastel-bg) */
-        }
-        /* Custom scrollbar for better aesthetics */
-        ::-webkit-scrollbar {
-            width: 8px; /* Sets the width of the scrollbar */
-        }
-        ::-webkit-scrollbar-track {
-            background: #e0e0e0; /* Color of the scrollbar track */
-            border-radius: 10px; /* Rounds the corners of the scrollbar track */
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #888; /* Color of the scrollbar thumb (the draggable part) */
-            border-radius: 10px; /* Rounds the corners of the scrollbar thumb */
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555; /* Color of the scrollbar thumb on hover */
-        }
-        /* Style for contenteditable elements when focused (for task editing) */
-        [contenteditable]:focus {
-            outline: 2px solid theme('colors.pastel-accent'); /* Adds a 2px solid outline using 'pastel-accent' color when an editable element is focused */
-            border-radius: 0.25rem; /* Adds rounded corners to the outline */
-            padding: 0.25rem; /* Adds some padding inside the outline */
-        }
-        /* Visual feedback for drag and drop operations */
-        .dragging {
-            opacity: 0.5; /* Makes the dragged item semi-transparent */
-            border: 2px dashed theme('colors.pastel-accent'); /* Adds a dashed border using 'pastel-accent' color to the dragged item */
-        }
-        /* Modal overlay styling for other modals (messageBox) */
-        .modal-overlay {
-            position: fixed; /* Positions the modal relative to the viewport */
-            top: 0; /* Aligns to the top of the viewport */
-            left: 0; /* Aligns to the left of the viewport */
-            width: 100%; /* Makes the overlay span the full width of the viewport */
-            height: 100%; /* Makes the overlay span the full height of the viewport */
-            background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black background */
-            display: flex; /* Uses flexbox for centering its content */
-            justify-content: center; /* Centers content horizontally */
-            align-items: center; /* Centers content vertically */
-            z-index: 1000; /* Ensures it's on top of other content */
-        }
-        /* Custom class for the hover-to-expand functionality for Fider instructions within settings */
-        .fider-button-wrapper:hover .fider-instructions-dropdown {
-            max-height: 150px; /* Expands the instructions on hover (adjust as needed based on content height) */
-            opacity: 1; /* Makes the instructions fully visible on hover */
-            transition: max-height 0.3s ease-in, opacity 0.3s ease-in; /* Smooth transition for max-height and opacity when expanding */
-        }
-        .fider-instructions-dropdown {
-            max-height: 0; /* Initially hides the instructions */
-            overflow: hidden; /* Hides overflowing content */
-            opacity: 0; /* Makes the instructions invisible initially */
-            transition: max-height 0.3s ease-out, opacity 0.3s ease-out; /* Smooth transition for collapsing */
-            padding-top: 0.5rem; /* Small padding for visual separation */
-            font-size: 0.75rem; /* Smaller font size for instructions */
-            line-height: 1.25; /* Adjust line height for readability */
-        }
-    </style>
-    <script>
-        tailwind.config = {
-            darkMode: 'class', // Enable dark mode based on 'dark' class on HTML
-            theme: {
-                extend: {
-                    colors: {
-                        // Light Mode Palette
-                        'pastel-bg-light': '#F3C6F2', // Primary Background (Pink/Light Magenta)
-                        'pastel-card-light': '#EFA6B6', // Secondary Background (Light Pink/Rose)
-                        'pastel-primary-light': '#7554AE', // Primary Accent (Deep Purple)
-                        'pastel-secondary-light': '#A98FE8', // Secondary Accent (Lighter Purple - Adjusted from Medium Blue-Purple)
-                        'pastel-accent': '#7554AE', // Using Primary Accent for strong accents like focus rings or category tags if desired.
-                                                    // Sticking to primary accent for consistency with user's guidelines for "highlights".
-                        'pastel-text-light': '#381D2A', // Dark Text (Very Dark Reddish-Brown/Plum)
-
-                        // Dark Mode Palette (Derived / Mapped)
-                        'dark-pastel-bg': '#21153B', // A very dark purple derived from primary accent
-                        'dark-pastel-card': '#4A2C4F', // Adjusted to a slightly lighter purple for card background
-                        'dark-pastel-primary': '#7554AE', // Primary Accent (Deep Purple) for dark mode buttons
-                        'dark-pastel-secondary': '#BD98E0', // Secondary Accent (Medium Purple - Adjusted from Medium Blue-Purple)
-                        'dark-pastel-accent': '#BD98E0', // Medium Purple as accent in dark mode for better visibility
-                        'dark-text': '#FFFFFF', // Light Text (White)
-                        'dark-text-secondary': '#BD98E0', // Medium Text (Medium Purple)
-
-                        // Existing colors to keep (e.g., for warnings, errors)
-                        'light_coral': { DEFAULT: '#f08080', 100: '#420808', 200: '#830f0f', 300: '#c51717', 400: '#e83d3d', 500: '#f08080', 600: '#f39999', 700: '#f6b2b2', 800: '#f9cccc', 900: '#fce5e5' },
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Link to Separate Vanilla CSS File -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- No internal style block needed, moved to style.css -->
+    <!-- No tailwind config script needed -->
 </head>
-<body class="flex flex-col items-center min-h-screen bg-pastel-bg-light dark:bg-dark-pastel-bg transition-colors duration-300">
-<nav class="w-full bg-pastel-bg-light dark:bg-dark-pastel-bg p-4 shadow-sm flex justify-between items-center fixed top-0 left-0 z-50 transition-colors duration-300">
-    <div class="flex-grow text-center">
-        <h1 class="text-xl font-bold text-theme-text-dark dark:text-theme-text-light inline-block">ECHO TASKS</h1>
-    </div><!--<h1 class="text-xl font-bold text-pastel-text-light dark:text-dark-text">My To-Do App</h1>-->
-    <div class="relative">
-        <button id="settingsBtn" class="p-2 rounded-full hover:bg-pastel-secondary-light dark:hover:bg-dark-pastel-secondary transition-colors duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-more-horizontal text-pastel-text-light dark:text-dark-text-secondary">
+<body>
+<nav class="app-nav">
+    <div class="nav-title">
+        <h1>ECHO TASKS</h1>
+    </div>
+    <div class="relative-container">
+        <button id="settingsBtn" class="btn-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-more-horizontal">
                 <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
             </svg>
         </button>
-        <div id="settingsMenu" class="absolute right-0 mt-2 w-48 bg-pastel-card-light dark:bg-dark-pastel-card rounded-lg shadow-lg py-2 hidden z-50 transition-colors duration-300">
-            <button id="darkModeToggleBtn" class="w-full text-left px-4 py-2 text-pastel-text-light dark:text-dark-text hover:bg-pastel-secondary-light dark:hover:bg-dark-pastel-secondary flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon text-pastel-text-light dark:text-dark-text-secondary">
+        <div id="settingsMenu" class="dropdown-menu hidden">
+            <button id="darkModeToggleBtn" class="dropdown-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon">
                     <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
                 </svg>
                 <span>Light/Dark Mode</span>
             </button>
-            <button id="passwordChangeBtn" class="w-full text-left px-4 py-2 text-pastel-text-light dark:text-dark-text hover:bg-pastel-secondary-light dark:hover:bg-dark-pastel-secondary flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key text-pastel-text-light dark:text-dark-text-secondary">
+            <button id="passwordChangeBtn" class="dropdown-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key">
                     <path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.778-7.778z"/><path d="m15.5 6.5 3.5-3.5L22 7l-3.5 3.5"/><path d="M12 12 2 22Z"/>
                 </svg>
                 <span>Change Password</span>
             </button>
-            <button id="addProfileInfoBtn" class="w-full text-left px-4 py-2 text-pastel-text-light dark:text-dark-text hover:bg-pastel-secondary-light dark:hover:bg-dark-pastel-secondary flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus text-pastel-text-light dark:text-dark-text-secondary">
+            <button id="addProfileInfoBtn" class="dropdown-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/>
                 </svg>
                 <span>Add Profile Info</span>
             </button>
-            <button id="exportDataBtn" class="w-full text-left px-4 py-2 text-pastel-text-light dark:text-dark-text hover:bg-pastel-secondary-light dark:hover:bg-dark-pastel-secondary flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download text-pastel-text-light dark:text-dark-text-secondary">
+            <button id="exportDataBtn" class="dropdown-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>
                 </svg>
                 <span>Export Data (PDF)</span>
             </button>
             <div class="fider-button-wrapper">
-                <button id="openFiderBtn"
-                        class="w-full text-left px-4 py-2 text-pastel-text-light dark:text-dark-text hover:bg-pastel-secondary-light dark:hover:bg-dark-pastel-secondary flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square text-pastel-text-light dark:text-dark-text-secondary">
+                <button id="openFiderBtn" class="dropdown-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                     </svg>
                     <span>Feedback & Ideas</span>
                 </button>
-                <div class="fider-instructions-dropdown px-4 text-pastel-text-light dark:text-dark-text-secondary">
-                    <p class="font-semibold text-pastel-text-light dark:text-dark-text mb-1">How to use Fider.io:</p>
-                    <ul class="list-disc list-inside space-y-0.5">
+                <div class="fider-instructions-dropdown">
+                    <p class="font-semibold mb-1">How to use Fider.io:</p>
+                    <ul class="fider-list">
                         <li>Click the "Feedback & Ideas" button.</li>
                         <li>You will be redirected to the Fider.io board in a new tab.</li>
                         <li>Sign in or create an account on Fider.io (this is separate from your To-Do app account).</li>
@@ -155,15 +67,14 @@
                     </ul>
                 </div>
             </div>
-            <button id="logoutBtn"
-                    class="w-full text-left px-4 py-2 text-pastel-text-light dark:text-dark-text hover:bg-pastel-secondary-light dark:hover:bg-dark-pastel-secondary flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out text-pastel-text-light dark:text-dark-text-secondary">
+            <button id="logoutBtn" class="dropdown-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="17 16 22 12 17 8"/><line x1="22" x2="11" y1="12" y2="12"/>
                 </svg>
                 <span>Log Out</span>
             </button>
-            <button id="deleteAccountBtn" class="w-full text-left px-4 py-2 text-pastel-text-light dark:text-dark-text hover:bg-pastel-secondary-light dark:hover:bg-dark-pastel-secondary flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2 text-pastel-text-light dark:text-dark-text-secondary">
+            <button id="deleteAccountBtn" class="dropdown-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2">
                     <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>
                 </svg>
                 <span>Delete Account</span>
@@ -171,79 +82,62 @@
         </div>
     </div>
 </nav>
-<main class="flex-grow flex items-center justify-center w-full mt-20 p-4"> <div id="authContainer" class="bg-pastel-card-light dark:bg-dark-pastel-card p-6 rounded-xl shadow-lg w-full max-w-md hidden transition-colors duration-300">
-    <h1 class="text-3xl font-bold text-pastel-text-light dark:text-dark-text mb-6 text-center">Welcome</h1>
-    <p class="text-pastel-text-light dark:text-dark-text-secondary mb-4 text-center">Sign in or create an account to manage your tasks.</p>
+<main class="main-content">
+    <div id="authContainer" class="card-container hidden">
+        <h1 class="card-title">Welcome</h1>
+        <p class="card-subtitle">Sign in or create an account to manage your tasks.</p>
 
-    <div class="mb-4">
-        <label for="emailInput" class="block text-pastel-text-light dark:text-dark-text-secondary text-sm font-bold mb-2">Email:</label>
-        <input type="email" id="emailInput" placeholder="your@example.com"
-               class="w-full p-3 bg-pastel-bg-light dark:bg-dark-pastel-bg rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-accent text-pastel-text-light dark:text-dark-text shadow-sm border border-gray-200 dark:border-dark-border">
-    </div>
-    <div class="mb-6">
-        <label for="passwordInput" class="block text-pastel-text-light dark:text-dark-text-secondary text-sm font-bold mb-2">Password:</label>
-        <input type="password" id="passwordInput" placeholder="********"
-               class="w-full p-3 bg-pastel-bg-light dark:bg-dark-pastel-bg rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-accent text-pastel-text-light dark:text-dark-text shadow-sm border border-gray-200 dark:border-dark-border">
+        <div class="form-group">
+            <label for="emailInput" class="form-label">Email:</label>
+            <input type="email" id="emailInput" placeholder="your@example.com" class="input-base">
+        </div>
+        <div class="form-group mb-6">
+            <label for="passwordInput" class="form-label">Password:</label>
+            <input type="password" id="passwordInput" placeholder="********" class="input-base">
+        </div>
+
+        <div class="flex flex-col">
+            <p class="text-center text-sm font-medium mb-2" style="color: var(--primary);">First Time User? Please Press "Sign Up"!</p>
+            <button id="loginBtn" class="btn-primary">Log In</button>
+            <button id="signupBtn" class="btn-secondary">Sign Up</button>
+            <button id="forgotPasswordBtn" class="btn-link mt-2 text-center w-full">Forgot Password?</button>
+        </div>
     </div>
 
-    <div class="flex flex-col space-y-3">
-        <p class="text-center text-sm text-pastel-primary-light font-medium mb-2">First Time User? Please Press "Sign Up"!</p>
-        <button id="loginBtn"
-                class="bg-pastel-primary-light hover:bg-pastel-secondary-light text-pastel-text-light font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg">
-            Log In
-        </button>
-        <button id="signupBtn"
-                class="bg-pastel-secondary-light hover:bg-pastel-primary-light text-pastel-text-light font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg">
-            Sign Up
-        </button>
-        <button id="forgotPasswordBtn"
-                class="text-pastel-accent hover:text-pastel-primary-light text-sm mt-2 transition duration-300 ease-in-out hover:underline">
-            Forgot Password?
-        </button>
-    </div>
-</div>
-
-    <div id="todoContainer" class="bg-pastel-card-light dark:bg-dark-pastel-card p-6 rounded-xl shadow-lg w-full max-w-md hidden transition-colors duration-300">
-        <h1 class="text-3xl font-bold text-pastel-text-light dark:text-dark-text mb-6 text-center">My To-Do List</h1>
+    <div id="todoContainer" class="card-container hidden">
+        <h1 class="card-title">My To-Do List</h1>
 
         <div class="mb-4 text-center">
-            <div id="userIdDisplay" class="text-sm text-pastel-text-light dark:text-dark-text-secondary mb-1 break-words hidden">
+            <div id="userIdDisplay" class="text-sm text-muted mb-1 break-words hidden">
                 Loading user...
             </div>
-            <div id="emailVerificationMessage" class="text-light_coral-500 font-semibold mb-2 hidden">
-                Email not verified. <button id="resendVerificationBtn" class="text-pastel-accent hover:text-pastel-primary-light underline">Resend</button>
+            <div id="emailVerificationMessage" class="text-danger font-semibold mb-2 hidden">
+                Email not verified. <button id="resendVerificationBtn" class="btn-link underline">Resend</button>
             </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2 mb-6">
-            <input type="text" id="taskInput" placeholder="Add a new task..."
-                   class="flex-grow p-3 bg-pastel-bg-light dark:bg-dark-pastel-bg rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-accent text-pastel-text-light dark:text-dark-text shadow-sm border border-gray-200 dark:border-dark-border">
-            <input type="date" id="dueDateInput" placeholder="Select Date"
-                   class="p-3 bg-pastel-bg-light dark:bg-dark-pastel-bg rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-accent text-pastel-text-light dark:text-dark-text shadow-sm border border-gray-200">
-            <input type="time" id="dueTimeInput" placeholder="Select Time"
-                   class="p-3 bg-pastel-bg-light dark:bg-dark-pastel-bg rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-accent text-pastel-text-light dark:text-dark-text shadow-sm border border-gray-200">
-            <input type="text" id="categoryInput" placeholder="Category (e.g., Work)"
-                   class="p-3 bg-pastel-bg-light dark:bg-dark-pastel-bg rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-accent text-pastel-text-light dark:text-dark-text w-full sm:w-auto shadow-sm border border-gray-200 dark:border-dark-border">
+        <div class="input-group-row">
+            <input type="text" id="taskInput" placeholder="Add a new task..." class="input-base input-grow">
+            <input type="date" id="dueDateInput" class="input-base auto-width">
+            <input type="time" id="dueTimeInput" class="input-base auto-width">
+            <input type="text" id="categoryInput" placeholder="Category" class="input-base auto-width">
         </div>
-        <div class="flex flex-wrap gap-2 mb-6">
-            <button id="addTaskBtn"
-                    class="flex-grow bg-pastel-primary-light hover:bg-pastel-secondary-light text-pastel-text-light font-semibold py-3 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg">
-                Add Task
-            </button>
+        <div class="flex gap-2 mb-6">
+            <button id="addTaskBtn" class="btn-primary">Add Task</button>
         </div>
 
-        <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
-            <div class="flex items-center w-full sm:w-auto justify-between sm:justify-start">
-                <label for="filterSelect" class="text-pastel-text-light dark:text-dark-text-secondary mr-2">Show:</label>
-                <select id="filterSelect" class="p-2 border border-gray-200 dark:border-dark-border rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-accent bg-pastel-bg-light dark:bg-dark-pastel-bg text-pastel-text-light dark:text-dark-text">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label for="filterSelect" class="form-label mr-2 mb-0">Show:</label>
+                <select id="filterSelect" class="filter-select">
                     <option value="all">All</option>
                     <option value="active">Active</option>
                     <option value="completed">Completed</option>
                 </select>
             </div>
-            <div class="flex items-center w-full sm:w-auto justify-between sm:justify-start">
-                <label for="sortSelect" class="text-pastel-text-light dark:text-dark-text-secondary mr-2">Sort by:</label>
-                <select id="sortSelect" class="p-2 border border-gray-200 dark:border-dark-border rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-accent bg-pastel-bg-light dark:bg-dark-pastel-bg text-pastel-text-light dark:text-dark-text">
+            <div class="filter-group">
+                <label for="sortSelect" class="form-label mr-2 mb-0">Sort by:</label>
+                <select id="sortSelect" class="filter-select">
                     <option value="timestamp_asc">Oldest First</option>
                     <option value="timestamp_desc">Newest First</option>
                     <option value="dueDate_asc">Due Date (Asc)</option>
@@ -254,10 +148,10 @@
             </div>
         </div>
 
-        <ul id="taskList" class="space-y-3">
+        <ul id="taskList" class="task-list">
         </ul>
 
-        <div id="loadingIndicator" class="text-center text-pastel-text-light dark:text-dark-text-secondary mt-4 hidden">
+        <div id="loadingIndicator" class="text-center text-muted mt-4 hidden">
             Loading tasks...
         </div>
 
@@ -265,1085 +159,14 @@
 </main>
 
 <div id="messageBox" class="modal-overlay hidden">
-    <div class="bg-pastel-card-light dark:bg-dark-pastel-card p-6 rounded-lg shadow-xl max-w-sm w-full text-center transition-colors duration-300">
-        <p id="messageText" class="text-lg font-semibold text-pastel-text-light dark:text-dark-text mb-4"></p>
-        <button id="messageBoxCloseBtn" class="bg-pastel-primary-light hover:bg-pastel-secondary-light text-pastel-text-light font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg">
+    <div class="modal-content">
+        <p id="messageText" class="text-lg font-semibold mb-4"></p>
+        <button id="messageBoxCloseBtn" class="btn-primary w-full">
             OK
         </button>
     </div>
 </div>
 
-<script type="module">
-    // Firebase SDK Imports:
-    // initializeApp: To initialize the Firebase app.
-    // getAuth: To get the authentication service instance.
-    // createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendEmailVerification, sendPasswordResetEmail:
-    //      Authentication methods for user management.
-    // getFirestore: To get the Firestore database instance.
-    // collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, getDocs:
-    //      Firestore methods for database operations (CRUD, real-time listening, querying).
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import {
-        getAuth,
-        createUserWithEmailAndPassword,
-        signInWithEmailAndPassword,
-        onAuthStateChanged,
-        signOut,
-        sendEmailVerification,
-        sendPasswordResetEmail,
-        deleteUser // Import deleteUser for account deletion
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-    import {
-        getFirestore,
-        collection,
-        addDoc,
-        updateDoc,
-        deleteDoc,
-        doc,
-        onSnapshot,
-        query,
-        getDocs
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-    // Your web app's Firebase configuration.
-    // REPLACE THESE VALUES with your actual Firebase project's configuration
-    // obtained from the Firebase Console -> Project settings -> Your apps -> Web app setup.
-    const firebaseConfig = {
-        apiKey: "AIzaSyB7ZesRhCUfElvv58AyzSQjXcP_dqbFH_4",
-        authDomain: "my-to-do-app-cd314.firebaseapp.com",
-        projectId: "my-to-do-app-cd314",
-        storageBucket: "my-to-do-app-cd314.firebasestorage.app",
-        messagingSenderId: "184421960045",
-        appId: "1:184421960045:web:57b0e84b5b38ebaf27b264",
-        measurementId: "G-S0VBJXLSDX"
-    };
-
-
-    // Define appId using the projectId from your firebaseConfig.
-    // This is used to construct the Firestore path for user-specific data:
-    // `artifacts/${appId}/users/${userId}/tasks`
-    const appId = firebaseConfig.projectId;
-
-    // Firebase Service Instances (will be initialized later)
-    let app;
-    let db;
-    let auth;
-    let currentUser = null; // Stores the Firebase User object for current authenticated user
-    let userId = null; // Stores the UID of the current authenticated user
-    let isAuthReady = false; // Flag to indicate if Firebase Authentication is fully initialized and ready
-    let unsubscribeFromTasks = null; // Stores the unsubscribe function for the Firestore real-time listener
-
-    // Global state variables for filtering and sorting tasks
-    let currentFilter = 'all'; // Can be 'all', 'active', or 'completed'
-    let currentSort = 'timestamp_asc'; // Defines the current sorting order for tasks
-
-    // DOM Element References:
-    // Authentication Section
-    const authContainer = document.getElementById('authContainer');
-    const emailInput = document.getElementById('emailInput');
-    const passwordInput = document.getElementById('passwordInput');
-    const loginBtn = document.getElementById('loginBtn');
-    const signupBtn = document.getElementById('signupBtn');
-    const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
-
-    // To-Do List Section
-    const todoContainer = document.getElementById('todoContainer');
-    const taskInput = document.getElementById('taskInput');
-    const dueDateInput = document.getElementById('dueDateInput');
-    const dueTimeInput = document.getElementById('dueTimeInput');
-    const categoryInput = document.getElementById('categoryInput');
-    const addTaskBtn = document.getElementById('addTaskBtn');
-    const taskList = document.getElementById('taskList');
-    const userIdDisplay = document.getElementById('userIdDisplay');
-    const emailVerificationMessage = document.getElementById('emailVerificationMessage');
-    const resendVerificationBtn = document.getElementById('resendVerificationBtn');
-    const loadingIndicator = document.getElementById('loadingIndicator');
-    // const logoutBtn = document.getElementById('logoutBtn'); // Moved to settings menu
-    const filterSelect = document.getElementById('filterSelect');
-    const sortSelect = document.getElementById('sortSelect');
-
-    // New DOM elements for Navbar and Settings
-    const settingsBtn = document.getElementById('settingsBtn');
-    const settingsMenu = document.getElementById('settingsMenu');
-    const darkModeToggleBtn = document.getElementById('darkModeToggleBtn');
-    const passwordChangeBtn = document.getElementById('passwordChangeBtn');
-    const deleteAccountBtn = document.getElementById('deleteAccountBtn');
-    const addProfileInfoBtn = document.getElementById('addProfileInfoBtn');
-    const exportDataBtn = document.getElementById('exportDataBtn');
-    const openFiderBtn = document.getElementById('openFiderBtn'); // Now in settings menu
-    const logoutBtn = document.getElementById('logoutBtn'); // Now in settings menu
-
-
-    // Message Box Elements
-    const messageBox = document.getElementById('messageBox');
-    const messageText = document.getElementById('messageText');
-    const messageBoxCloseBtn = document.getElementById('messageBoxCloseBtn');
-
-    // Drag and drop variables
-    let draggedItem = null; // Stores the HTML element currently being dragged
-
-    let isDarkMode = false; // State for dark mode
-
-    /**
-     * @function showMessageBox
-     * @description Displays a custom modal message box to the user.
-     * This function replaces browser's native `alert()` for better UI control.
-     * @param {string} message - The text message to be displayed inside the modal.
-     * @returns {void}
-     */
-    function showMessageBox(message) {
-        messageText.textContent = message;
-        messageBox.classList.remove('hidden'); // Make the message box visible
-    }
-
-    /**
-     * @description Event listener for the close button of the message box.
-     * Hides the message box when clicked.
-     * @returns {void}
-     */
-    messageBoxCloseBtn.addEventListener('click', () => {
-        messageBox.classList.add('hidden'); // Hide the message box
-    });
-
-    /**
-     * @function toggleSettingsMenu
-     * @description Toggles the visibility of the settings dropdown menu.
-     */
-    function toggleSettingsMenu() {
-        settingsMenu.classList.toggle('hidden');
-    }
-
-    /**
-     * @function toggleDarkMode
-     * @description Toggles between light and dark mode for the application.
-     * It adds or removes the 'dark' class from the `<html>` element and saves the preference to localStorage.
-     */
-    function toggleDarkMode() {
-        const htmlElement = document.documentElement;
-        if (htmlElement.classList.contains('dark')) {
-            htmlElement.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-            isDarkMode = false;
-        } else {
-            htmlElement.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-            isDarkMode = true;
-        }
-        settingsMenu.classList.add('hidden'); // Close menu after selection
-    }
-
-    /**
-     * @function applySavedTheme
-     * @description Applies the theme saved in localStorage when the page loads.
-     */
-    function applySavedTheme() {
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-            isDarkMode = true;
-        } else {
-            document.documentElement.classList.remove('dark');
-            isDarkMode = false;
-        }
-    }
-
-    /**
-     * @function handlePasswordChange
-     * @description Placeholder for password change functionality.
-     * In a real app, this would typically redirect to a password reset flow or a dedicated profile page.
-     */
-    function handlePasswordChange() {
-        showMessageBox("To change your password, please use the 'Forgot Password?' link on the login page. This ensures a secure process.");
-        settingsMenu.classList.add('hidden'); // Close menu
-    }
-
-    /**
-     * @function handleDeleteAccount
-     * @description Placeholder for account deletion functionality.
-     * Account deletion requires re-authentication for security.
-     */
-    async function handleDeleteAccount() {
-        if (!currentUser) {
-            showMessageBox("You must be logged in to delete your account.");
-            settingsMenu.classList.add('hidden');
-            return;
-        }
-
-        showMessageBox("For security, you need to re-authenticate to delete your account. Please log out and log back in, then try deleting your account again.");
-        settingsMenu.classList.add('hidden'); // Close menu
-
-        // In a full implementation, you'd typically prompt for re-authentication here,
-        // then call `deleteUser(currentUser)`.
-        // Example:
-        // try {
-        //     await reauthenticateWithCredential(currentUser, credential); // Get credential from user input
-        //     await deleteUser(currentUser);
-        //     showMessageBox("Your account has been successfully deleted.");
-        // } catch (error) {
-        //     console.error("Error deleting account:", error);
-        //     showMessageBox("Failed to delete account. Please re-authenticate and try again.");
-        // }
-    }
-
-    /**
-     * @function handleAddProfileInfo
-     * @description Placeholder for adding/editing profile information.
-     */
-    function handleAddProfileInfo() {
-        showMessageBox("This feature is under development. You will be able to add profile information here soon!");
-        settingsMenu.classList.add('hidden'); // Close menu
-    }
-
-    /**
-     * @function handleExportData
-     * @description Placeholder for exporting user data (e.g., tasks) to PDF.
-     * This would involve fetching all user tasks and then using a library (e.g., jsPDF) to generate a PDF.
-     */
-    async function handleExportData() {
-        if (!db || !userId || !isAuthReady) {
-            showMessageBox("Please log in to export your data.");
-            settingsMenu.classList.add('hidden');
-            return;
-        }
-
-        showMessageBox("Exporting data to PDF is under development. This feature will be available soon!");
-        settingsMenu.classList.add('hidden'); // Close menu
-
-        // Example of how you might fetch data for export:
-        // try {
-        //     const tasksSnapshot = await getDocs(collection(db, `artifacts/${appId}/users/${userId}/tasks`));
-        //     const tasksToExport = [];
-        //     tasksSnapshot.forEach(doc => {
-        //         tasksToExport.push(doc.data());
-        //     });
-        //     console.log("Tasks for export:", tasksToExport);
-        //     // Here you would integrate a PDF generation library like jsPDF
-        //     // For example:
-        //     // const doc = new jsPDF();
-        //     // doc.text("My To-Do List", 10, 10);
-        //     // let y = 20;
-        //     // tasksToExport.forEach((task, index) => {
-        //     //     doc.text(`${index + 1}. ${task.text} (Due: ${task.dueDate || 'N/A'})`, 10, y);
-        //     //     y += 10;
-        //     // });
-        //     // doc.save("my-todo-list.pdf");
-        //     // showMessageBox("Your To-Do List has been exported as PDF!");
-        // } catch (error) {
-        //     console.error("Error exporting data:", error);
-        //     showMessageBox("Failed to export data. Please try again.");
-        // }
-    }
-
-
-    /**
-     * @function initializeFirebase
-     * @description Initializes the Firebase application with the provided configuration.
-     * Sets up the Firestore database and Firebase Authentication services.
-     * Crucially, it establishes an `onAuthStateChanged` listener to react to user login/logout
-     * states, managing UI visibility and email verification status.
-     * @returns {Promise<void>}
-     */
-    async function initializeFirebase() {
-        try {
-            // Initialize Firebase app with your project's configuration
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-
-            // Set up a listener for authentication state changes.
-            // This function runs whenever the user signs in, signs out, or their auth state changes.
-            onAuthStateChanged(auth, (user) => {
-                currentUser = user; // Store the current Firebase User object globally
-                if (user) {
-                    // User is signed in
-                    userId = user.uid; // Set the user's UID
-                    userIdDisplay.textContent = `User ID: ${userId}`; // Display UID in UI
-                    isAuthReady = true; // Mark authentication as ready
-
-                    // Check and display email verification status
-                    if (!user.emailVerified) {
-                        emailVerificationMessage.classList.remove('hidden'); // Show verification message
-                    } else {
-                        emailVerificationMessage.classList.add('hidden'); // Hide verification message
-                    }
-
-                    authContainer.classList.add('hidden'); // Hide the authentication container
-                    todoContainer.classList.remove('hidden'); // Show the To-Do list container
-                    console.log("User signed in:", userId);
-                    setupRealtimeListener(); // Start listening for tasks for the logged-in user
-                } else {
-                    // User is signed out
-                    userId = null; // Clear user ID
-                    isAuthReady = false; // Mark authentication as not ready
-                    authContainer.classList.remove('hidden'); // Show the authentication container
-                    todoContainer.classList.add('hidden'); // Hide the To-Do list container
-                    taskList.innerHTML = ''; // Clear tasks from the UI
-                    userIdDisplay.textContent = 'Please log in.'; // Update user ID display
-                    emailVerificationMessage.classList.add('hidden'); // Hide verification message
-                    console.log("User signed out.");
-                    // If there's an active Firestore listener, unsubscribe it to stop real-time updates
-                    if (unsubscribeFromTasks) {
-                        unsubscribeFromTasks();
-                        unsubscribeFromTasks = null;
-                    }
-                }
-            });
-        } catch (error) {
-            console.error("Error initializing Firebase:", error);
-            showMessageBox("Failed to initialize the application. Check console for details.");
-        }
-    }
-
-    /**
-     * @function setupRealtimeListener
-     * @description Sets up a real-time listener for tasks in Firestore for the current user.
-     * This listener automatically updates the UI whenever there are changes in the database.
-     * It fetches tasks, applies the current filter and sort settings, and then renders them.
-     * It also ensures only one listener is active at a time by unsubscribing from previous ones.
-     * @returns {void}
-     */
-    function setupRealtimeListener() {
-        if (!db || !userId || !isAuthReady) {
-            console.log("Firestore not ready or user not authenticated. Skipping listener setup.");
-            return;
-        }
-
-        loadingIndicator.classList.remove('hidden'); // Show loading indicator
-        const tasksCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/tasks`);
-        const q = query(tasksCollectionRef); // Create a query to the user's tasks collection
-
-        // Unsubscribe from any previously active listener to prevent duplicate data rendering
-        if (unsubscribeFromTasks) {
-            unsubscribeFromTasks();
-        }
-
-        // Set up the new real-time listener using onSnapshot
-        unsubscribeFromTasks = onSnapshot(q, (snapshot) => {
-            let tasks = [];
-            snapshot.forEach(doc => {
-                const taskData = doc.data();
-                tasks.push({ id: doc.id, ...taskData });
-            });
-
-            // Apply filtering based on the `currentFilter` state
-            tasks = filterTasks(tasks, currentFilter);
-
-            // Apply sorting based on the `currentSort` state
-            // Note: Firestore's orderBy is avoided to prevent requiring complex indexes.
-            // Sorting is done client-side in memory.
-            tasks = sortTasks(tasks, currentSort);
-
-            // Re-render tasks in the UI
-            taskList.innerHTML = ''; // Clear all existing tasks from the list
-            tasks.forEach(task => displayTask(task)); // Render each task
-            loadingIndicator.classList.add('hidden'); // Hide loading indicator
-        }, (error) => {
-            console.error("Error fetching real-time tasks:", error);
-            showMessageBox("Error loading tasks. Please refresh.");
-            loadingIndicator.classList.add('hidden');
-        });
-    }
-
-    /**
-     * @function filterTasks
-     * @description Filters a list of tasks based on the specified filter type.
-     * @param {Array<Object>} tasks - The array of task objects to filter. Each task object
-     * is expected to have a `completed` boolean property.
-     * @param {string} filter - The filter type. Valid values are:
-     * - 'all': Returns all tasks.
-     * - 'active': Returns tasks where `completed` is false.
-     * - 'completed': Returns tasks where `completed` is true.
-     * @returns {Array<Object>} The filtered array of task objects.
-     */
-    function filterTasks(tasks, filter) {
-        switch (filter) {
-            case 'active':
-                return tasks.filter(task => !task.completed);
-            case 'completed':
-                return tasks.filter(task => task.completed);
-            case 'all':
-            default:
-                return tasks;
-        }
-    }
-
-    /**
-     * @function sortTasks
-     * @description Sorts a list of tasks based on the specified sort order.
-     * This function implements client-side sorting to avoid Firestore index issues
-     * with `orderBy` on multiple fields.
-     * @param {Array<Object>} tasks - The array of task objects to sort.
-     * @param {string} sortOrder - The sort order. Valid values are:
-     * - 'timestamp_asc': Sorts by creation timestamp ascending (oldest first).
-     * - 'timestamp_desc': Sorts by creation timestamp (newest first).
-     * - 'dueDate_asc': Sorts by due date ascending. Tasks without due dates appear at the end.
-     * - 'dueDate_desc': Sorts by due date descending. Tasks without due dates appear at the beginning.
-     * - 'text_asc': Sorts by task text alphabetically (A-Z).
-     * - 'text_desc': Sorts by task text alphabetically (Z-A).
-     * @returns {Array<Object>} The sorted array of task objects.
-     */
-    function sortTasks(tasks, sortOrder) {
-        return tasks.sort((a, b) => {
-            // Helper to create a full Date object from date and optional time strings
-            const createDateTime = (dateStr, timeStr) => {
-                if (!dateStr) return null; // No date, cannot create full datetime
-                // If timeStr is not provided, default to '00:00' for consistent date parsing
-                const fullDateTimeStr = `${dateStr}T${timeStr || '00:00'}:00`;
-                return new Date(fullDateTimeStr);
-            };
-
-            switch (sortOrder) {
-                case 'timestamp_asc':
-                    // Sort by creation timestamp ascending (oldest first)
-                    // Converts Firestore Timestamp objects to Date objects for comparison.
-                    // Handles cases where timestamp might be missing by treating it as 0.
-                    return (a.timestamp ? a.timestamp.toDate() : 0) - (b.timestamp ? b.timestamp.toDate() : 0);
-                case 'timestamp_desc':
-                    // Sort by creation timestamp descending (newest first)
-                    return (b.timestamp ? b.timestamp.toDate() : 0) - (a.timestamp ? a.timestamp.toDate() : 0);
-                case 'dueDate_asc':
-                    // Sort by due date (and time) ascending. Tasks without due dates are pushed to the end
-                    // by assigning a very late date for comparison.
-                    const dateA = createDateTime(a.dueDate, a.dueTime) || new Date('9999-12-31T23:59:59');
-                    const dateB = createDateTime(b.dueDate, b.dueTime) || new Date('9999-12-31T23:59:59');
-                    return dateA.getTime() - dateB.getTime();
-                case 'dueDate_desc':
-                    // Sort by due date (and time) descending. Tasks without due dates are pushed to the beginning
-                    // by assigning a very early date for comparison.
-                    const dateADesc = createDateTime(a.dueDate, a.dueTime) || new Date('0000-01-01T00:00:00');
-                    const dateBDesc = createDateTime(b.dueDate, b.dueTime) || new Date('0000-01-01T00:00:00');
-                    return dateBDesc.getTime() - dateADesc.getTime();
-                case 'text_asc':
-                    // Sort by task text alphabetically ascending using localeCompare for proper string comparison
-                    return a.text.localeCompare(b.text);
-                case 'text_desc':
-                    // Sort by task text alphabetically descending
-                    return b.text.localeCompare(a.text);
-                default:
-                    return 0; // No specific sorting applied
-            }
-        });
-    }
-
-    /**
-     * @function displayTask
-     * @description Creates and appends a single task item as an `<li>` element to the `taskList` in the UI.
-     * This function is responsible for rendering all task details and interactive elements.
-     * It includes:
-     * - Task text (editable on double-click)
-     * - Completion status (line-through)
-     * - Due date display with overdue/due today styling
-     * - Category/tag display
-     * - Delete button
-     * - Drag-and-drop functionality for reordering tasks.
-     * @param {Object} task - The task object containing id, text, completed, dueDate, category, etc.
-     * @returns {void}
-     */
-    function displayTask(task) {
-        const listItem = document.createElement('li');
-        listItem.dataset.id = task.id; // Store Firestore document ID on the element
-        listItem.draggable = true; // Enable HTML5 drag-and-drop for this list item
-        listItem.classList.add('flex', 'flex-col', 'sm:flex-row', 'items-start', 'sm:items-center', 'justify-between', 'bg-pastel-bg-light', 'dark:bg-dark-pastel-bg', 'p-3', 'rounded-lg', 'shadow-sm', 'transition', 'duration-200', 'ease-in-out', 'group');
-
-        // --- Drag and Drop Event Listeners ---
-        // Triggered when dragging of the item starts
-        listItem.addEventListener('dragstart', (e) => {
-            draggedItem = listItem; // Store reference to the element being dragged
-            e.dataTransfer.effectAllowed = 'move'; // Indicate that the item can be moved
-            // Add 'dragging' class after a slight delay to allow browser to capture initial drag image
-            setTimeout(() => listItem.classList.add('dragging'), 0);
-        });
-
-        // Triggered when a dragged item is moved over this list item
-        listItem.addEventListener('dragover', (e) => {
-            e.preventDefault(); // Crucial: Prevents default browser behavior (e.g., preventing drop)
-            const boundingBox = listItem.getBoundingClientRect();
-            const offset = boundingBox.y + (boundingBox.height / 2); // Calculate the vertical midpoint of the list item
-
-            // Provide visual feedback (top/bottom border) based on where the dragged item is over the target
-            if (e.clientY < offset) {
-                // If cursor is in the top half, indicate drop above
-                listItem.style.borderTop = '2px solid ' + tailwind.config.theme.extend.colors['pastel-accent'];
-                listItem.style.borderBottom = 'none';
-            } else {
-                // If cursor is in the bottom half, indicate drop below
-                listItem.style.borderBottom = '2px solid ' + tailwind.config.theme.extend.colors['pastel-accent'];
-                listItem.style.borderTop = 'none';
-            }
-        });
-
-        // Triggered when a dragged item leaves this list item
-        listItem.addEventListener('dragleave', () => {
-            // Remove visual feedback when dragged item leaves
-            listItem.style.borderTop = 'none';
-            listItem.style.borderBottom = 'none';
-        });
-
-        // Triggered when a dragged item is dropped on this list item
-        listItem.addEventListener('drop', (e) => {
-            e.preventDefault(); // Prevent default drop behavior
-            listItem.style.borderTop = 'none';
-            listItem.style.borderBottom = 'none'; // Clear visual feedback
-
-            // If a valid item is being dragged and it's not the same item being dropped on itself
-            if (draggedItem && draggedItem !== listItem) {
-                const boundingBox = listItem.getBoundingClientRect();
-                const offset = boundingBox.y + (boundingBox.height / 2);
-
-                // Insert the dragged item before or after the target item based on drop position
-                if (e.clientY < offset) {
-                    taskList.insertBefore(draggedItem, listItem);
-                } else {
-                    taskList.insertBefore(draggedItem, listItem.nextSibling);
-                }
-                updateTaskOrder(); // Call function to update the order in Firestore
-            }
-        });
-
-        // Triggered when the drag operation ends (whether successful drop or not)
-        listItem.addEventListener('dragend', () => {
-            draggedItem.classList.remove('dragging'); // Remove dragging visual class
-            draggedItem = null; // Clear the reference to the dragged item
-            // Clean up any lingering borders on all list items (important if drag ends outside a target)
-            Array.from(taskList.children).forEach(item => {
-                item.style.borderTop = 'none';
-                item.style.borderBottom = 'none';
-            });
-        });
-
-
-        // Main content div for task text and meta info (due date, category)
-        const mainContentDiv = document.createElement('div');
-        mainContentDiv.classList.add('flex-grow', 'flex', 'flex-col', 'sm:flex-row', 'sm:items-center', 'gap-1', 'sm:gap-3', 'mb-2', 'sm:mb-0');
-
-        // Task Text Span: Displays the task description
-        const taskTextSpan = document.createElement('span');
-        taskTextSpan.textContent = task.text;
-        taskTextSpan.classList.add('text-pastel-text-light', 'dark:text-dark-text-secondary', 'text-lg', 'cursor-pointer', 'min-w-0', 'break-words');
-        taskTextSpan.contentEditable = true; // Make the text directly editable in the UI
-        taskTextSpan.spellcheck = false; // Disable browser spellcheck for this editable field
-
-        // Apply line-through style if task is completed
-        if (task.completed) {
-            taskTextSpan.classList.add('line-through', 'text-gray-500', 'dark:text-gray-400');
-        }
-
-        // Event listeners for editing task text
-        // `blur` event: Triggered when the element loses focus (e.g., user clicks away)
-        taskTextSpan.addEventListener('blur', () => updateTaskText(task.id, taskTextSpan.textContent.trim()));
-        // `keypress` event: Triggered when a key is pressed while the element is focused
-        taskTextSpan.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault(); // Prevent adding a new line in contenteditable
-                taskTextSpan.blur(); // Programmatically trigger blur to save changes
-            }
-        });
-        // Toggle completion on click (still works on the span, even with contenteditable)
-        taskTextSpan.addEventListener('click', () => toggleTaskCompletion(task.id, !task.completed));
-
-
-        // Meta Information Div: Contains due date and category
-        const metaInfoDiv = document.createElement('div');
-        metaInfoDiv.classList.add('flex', 'items-center', 'text-sm', 'text-pastel-text-light', 'dark:text-dark-text-secondary', 'gap-2', 'flex-wrap');
-
-        // Display Due Date and Time if available
-        if (task.dueDate) {
-            const dueDateSpan = document.createElement('span');
-            // Combine date and time to create a full Date object for accurate comparison and display
-            const fullDueDate = new Date(`${task.dueDate}T${task.dueTime || '00:00'}:00`);
-            const today = new Date();
-            today.setHours(0,0,0,0); // Normalize today's date to midnight for accurate comparison
-
-            let dateClasses = ['text-pastel-text-light']; // Default text color
-            // Apply specific styling for tasks due today or overdue
-            if (fullDueDate.toDateString() === today.toDateString() && !task.completed) {
-                dateClasses = ['text-pastel-primary-light', 'font-semibold']; // Due today and not completed
-            } else if (fullDueDate < today && !task.completed) {
-                dateClasses = ['text-light_coral-500', 'font-semibold']; // Overdue and not completed
-            }
-            dueDateSpan.classList.add(...dateClasses);
-            // Display both date and time
-            dueDateSpan.textContent = `Due: ${fullDueDate.toLocaleDateString()} ${task.dueTime ? fullDueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}`;
-            metaInfoDiv.appendChild(dueDateSpan);
-        }
-
-        // Display Category if available and not empty
-        if (task.category && task.category.trim() !== '') {
-            const categorySpan = document.createElement('span');
-            categorySpan.classList.add('bg-pastel-accent', 'text-pastel-text-light', 'px-2', 'py-0.5', 'rounded-full', 'text-xs', 'font-medium');
-            categorySpan.textContent = task.category;
-            metaInfoDiv.appendChild(categorySpan);
-        }
-
-        // Append task text and meta info to the main content div
-        mainContentDiv.appendChild(taskTextSpan);
-        mainContentDiv.appendChild(metaInfoDiv);
-
-
-        // Actions Div: Contains buttons like delete
-        const actionsDiv = document.createElement('div');
-        actionsDiv.classList.add('flex', 'space-x-2', 'ml-0', 'sm:ml-4', 'flex-shrink-0'); // Adjust margin for responsiveness
-
-        // Delete Button
-        const deleteBtn = document.createElement('button');
-        deleteBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-light_coral-500 hover:text-light_coral-700 transition duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-        `;
-        deleteBtn.classList.add('p-1', 'rounded-full', 'hover:bg-gray-200', 'dark:hover:bg-dark-pastel-secondary');
-        deleteBtn.title = "Delete Task";
-        deleteBtn.addEventListener('click', () => deleteTask(task.id)); // Attach delete functionality
-
-        // Append elements to the list item and then to the task list
-        actionsDiv.appendChild(deleteBtn);
-        listItem.appendChild(mainContentDiv);
-        listItem.appendChild(actionsDiv);
-        taskList.appendChild(listItem);
-    }
-
-    /**
-     * @function updateTaskOrder
-     * @description Updates the 'order' field for all tasks in Firestore based on their current
-     * visual position in the UI's `taskList` after a drag-and-drop operation.
-     * This ensures the order persists across sessions. It uses a Firestore batch write
-     * for atomic and efficient updates of multiple documents.
-     * @returns {Promise<void>}
-     */
-    async function updateTaskOrder() {
-        // Ensure user is logged in before attempting to update Firestore
-        if (!db || !userId || !isAuthReady) {
-            showMessageBox("Please log in to reorder tasks.");
-            return;
-        }
-
-        const listItems = Array.from(taskList.children); // Get all current list items in their DOM order
-        const batch = db.batch(); // Create a new batch for atomic updates
-
-        // Iterate through the reordered list items and update their 'order' field in the batch
-        for (let i = 0; i < listItems.length; i++) {
-            const taskId = listItems[i].dataset.id; // Get the Firestore document ID from the listItem's data-id attribute
-            const taskRef = doc(db, `artifacts/${appId}/users/${userId}/tasks`, taskId); // Get a reference to the Firestore document
-            batch.update(taskRef, { order: i }); // Add an update operation to the batch, setting the new order (0-indexed)
-        }
-
-        try {
-            await batch.commit(); // Commit all batched updates to Firestore
-            console.log("Task order updated successfully.");
-        } catch (error) {
-            console.error("Error updating task order:", error);
-            showMessageBox("Failed to reorder tasks. Please try again.");
-        }
-    }
-
-
-    /**
-     * @function addTaskToFirestore
-     * @description Adds a new task document to the current user's Firestore collection.
-     * This function handles saving the task text, initial completion status,
-     * creation timestamp, optional due date, optional category, and an initial order.
-     * @param {string} text - The main text content of the task.
-     * @param {string|null} dueDate - The due date in 'YYYY-MM-DD' format (from input type="date"), or null if not provided.
-     * @param {string|null} dueTime - The due time in 'HH:MM' format (from input type="time"), or null if not provided.
-     * @param {string|null} category - The category string, or null/empty string if not provided.
-     * @returns {Promise<void>}
-     */
-    async function addTaskToFirestore(text, dueDate = null, dueTime = null, category = null) {
-        // Ensure user is logged in before adding tasks
-        if (!db || !userId || !isAuthReady) {
-            showMessageBox("Please log in to add tasks.");
-            return;
-        }
-        // Validate task text
-        if (text.trim() === '') {
-            showMessageBox("Task cannot be empty!");
-            return;
-        }
-        try {
-            // Get the current number of tasks to set an initial 'order' value for the new task.
-            // This simple approach ensures new tasks appear at the end by default before manual reordering.
-            const currentTasksSnapshot = await getDocs(collection(db, `artifacts/${appId}/users/${userId}/tasks`));
-            const newOrder = currentTasksSnapshot.size; // The new task's order will be the current total count
-
-            // Add the new document to the 'tasks' subcollection for the current user
-            await addDoc(collection(db, `artifacts/${appId}/users/${userId}/tasks`), {
-                text: text,
-                completed: false, // New tasks are always incomplete by default
-                timestamp: new Date(), // Store creation timestamp
-                dueDate: dueDate, // Store the provided due date
-                dueTime: dueTime, // Store the provided due time
-                category: category, // Store the provided category
-                order: newOrder // Store the initial order for drag and drop
-            });
-            // Clear input fields after successful addition
-            taskInput.value = '';
-            dueDateInput.value = '';
-            dueTimeInput.value = '';
-            categoryInput.value = '';
-        } catch (e) {
-            console.error("Error adding document: ", e);
-            showMessageBox("Failed to add task. Please try again.");
-        }
-    }
-
-    /**
-     * @function updateTaskText
-     * @description Updates the text content of an existing task in Firestore.
-     * This is called when a user edits a task directly in the UI (contenteditable).
-     * @param {string} id - The Firestore document ID of the task to update.
-     * @param {string} newText - The new text content for the task.
-     * @returns {Promise<void>}
-     */
-    async function updateTaskText(id, newText) {
-        // Ensure user is logged in before updating tasks
-        if (!db || !userId || !isAuthReady) {
-            showMessageBox("Please log in to edit tasks.");
-            return;
-        }
-        // Validate new task text
-        if (newText.trim() === '') {
-            showMessageBox("Task text cannot be empty! Reverting to previous text.");
-            // If the new text is empty, re-fetch tasks to revert the UI to the last saved state
-            setupRealtimeListener();
-            return;
-        }
-        try {
-            const taskRef = doc(db, `artifacts/${appId}/users/${userId}/tasks`, id); // Get reference to the specific task document
-            await updateDoc(taskRef, {
-                text: newText // Update only the 'text' field
-            });
-        } catch (e) {
-            console.error("Error updating task text: ", e);
-            showMessageBox("Failed to update task text. Please try again.");
-        }
-    }
-
-    /**
-     * @function toggleTaskCompletion
-     * @description Toggles the 'completed' status of a task in Firestore.
-     * This function is called when a user clicks on a task's text.
-     * @param {string} id - The Firestore document ID of the task to update.
-     * @param {boolean} completed - The new completion status (true for completed, false for active).
-     * @returns {Promise<void>}
-     */
-    async function toggleTaskCompletion(id, completed) {
-        // Ensure user is logged in before updating tasks
-        if (!db || !userId || !isAuthReady) {
-            showMessageBox("Please log in to update tasks.");
-            return;
-        }
-        try {
-            const taskRef = doc(db, `artifacts/${appId}/users/${userId}/tasks`, id); // Get reference to the specific task document
-            await updateDoc(taskRef, {
-                completed: completed // Update the 'completed' field
-            });
-        } catch (e) {
-            console.error("Error updating document: ", e);
-            showMessageBox("Failed to update task status. Please try again.");
-        }
-    }
-
-    /**
-     * @function deleteTask
-     * @description Deletes a task document from the user's Firestore collection.
-     * @param {string} id - The Firestore document ID of the task to delete.
-     * @returns {Promise<void>}
-     */
-    async function deleteTask(id) {
-        // Ensure user is logged in before deleting tasks
-        if (!db || !userId || !isAuthReady) {
-            showMessageBox("Please log in to delete tasks.");
-            return;
-        }
-        try {
-            await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/tasks`, id)); // Delete the specific task document
-        } catch (e) {
-            console.error("Error deleting document: ", e);
-            showMessageBox("Failed to delete task. Please try again.");
-        }
-    }
-
-    // --- Authentication Functions ---
-
-    /**
-     * @function handleSignUp
-     * @description Handles user registration with email and password using Firebase Authentication.
-     * Upon successful signup, it automatically sends an email verification link
-     * to the registered email address.
-     * @returns {Promise<void>}
-     */
-    async function handleSignUp() {
-        const email = emailInput.value;
-        const password = passwordInput.value;
-
-        // Basic client-side validation for input fields
-        if (!email || !password) {
-            showMessageBox("Please enter both email and password.");
-            return;
-        }
-
-        try {
-            // Create user account with email and password
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            // Send email verification to the newly created user
-            await sendEmailVerification(userCredential.user);
-            showMessageBox("Account created! A verification email has been sent to your address. Please verify your email to ensure full functionality.");
-            // The `onAuthStateChanged` listener will automatically detect the new login state and update the UI.
-        } catch (error) {
-            console.error("Error signing up:", error);
-            let errorMessage = "Failed to create account.";
-            // Provide user-friendly error messages based on Firebase error codes
-            switch (error.code) {
-                case 'auth/email-already-in-use':
-                    errorMessage = "This email is already in use. Try logging in.";
-                    break;
-                case 'auth/invalid-email':
-                    errorMessage = "Invalid email address.";
-                    break;
-                case 'auth/weak-password':
-                    errorMessage = "Password should be at least 6 characters.";
-                    break;
-                default:
-                    errorMessage = `Error: ${error.message}`;
-            }
-            showMessageBox(errorMessage);
-        }
-    }
-
-    /**
-     * @function handleLogin
-     * @description Handles user login with email and password using Firebase Authentication.
-     * @returns {Promise<void>}
-     */
-    async function handleLogin() {
-        const email = emailInput.value;
-        const password = passwordInput.value;
-
-        // Basic client-side validation for input fields
-        if (!email || !password) {
-            showMessageBox("Please enter both email and password.");
-            return;
-        }
-
-        try {
-            // Sign in user with email and password
-            await signInWithEmailAndPassword(auth, email, password);
-            showMessageBox("Logged in successfully!");
-            // The `onAuthStateChanged` listener will automatically detect the new login state and update the UI.
-        } catch (error) {
-            console.error("Error logging in:", error);
-            let errorMessage = "Invalid email or password.";
-            // Provide user-friendly error messages based on Firebase error codes
-            switch (error.code) {
-                case 'auth/invalid-credential': // Covers both incorrect password and user not found for security
-                    errorMessage = "Invalid email or password.";
-                    break;
-                case 'auth/invalid-email':
-                    errorMessage = "Invalid email address format.";
-                    break;
-                default:
-                    errorMessage = `Error: ${error.message}`;
-            }
-            showMessageBox(errorMessage);
-        }
-    }
-
-    /**
-     * @function handleLogout
-     * @description Handles user logout from Firebase Authentication.
-     * @returns {Promise<void>}
-     */
-    async function handleLogout() {
-        try {
-            await signOut(auth); // Sign out the current user
-            showMessageBox("Logged out successfully!");
-            // The `onAuthStateChanged` listener will automatically detect the logout state and update the UI.
-        } catch (error) {
-            console.error("Error logging out:", error);
-            showMessageBox("Failed to log out. Please try again.");
-        }
-    }
-
-    /**
-     * @function handleForgotPassword
-     * @description Sends a password reset email to the provided email address using Firebase Authentication.
-     * This allows users to regain access to their account if they forget their password.
-     * @returns {void}
-     */
-    async function handleForgotPassword() {
-        const email = emailInput.value;
-        // Ensure an email address is provided to send the reset link to
-        if (!email) {
-            showMessageBox("Please enter your email address to reset your password.");
-            return;
-        }
-        try {
-            await sendPasswordResetEmail(auth, email); // Send the password reset email
-            showMessageBox(`Password reset email sent to ${email}. Please check your inbox.`);
-        } catch (error) {
-            console.error("Error sending password reset email:", error);
-            let errorMessage = "Failed to send password reset email.";
-            // Provide user-friendly error messages based on Firebase error codes
-            switch (error.code) {
-                case 'auth/invalid-email':
-                    errorMessage = "Invalid email address.";
-                    break;
-                case 'auth/user-not-found':
-                    errorMessage = "No user found with that email address.";
-                    break;
-                default:
-                    errorMessage = `Error: ${error.message}`;
-            }
-            showMessageBox(errorMessage);
-        }
-    }
-
-    /**
-     * @function handleResendVerificationEmail
-     * @description Resends the email verification link to the currently logged-in user's email address.
-     * This function is typically called when a user clicks a "Resend" button if their email is unverified.
-     * @returns {Promise<void>}
-     */
-    async function handleResendVerificationEmail() {
-        // Only attempt to resend if a user is logged in and their email is not yet verified
-        if (currentUser && !currentUser.emailVerified) {
-            try {
-                await sendEmailVerification(currentUser); // Send the verification email
-                showMessageBox("Verification email re-sent! Please check your inbox.");
-            }
-            catch (error) {
-                console.error("Error resending verification email:", error);
-                showMessageBox("Failed to resend verification email. Please try again.");
-            }
-        } else {
-            showMessageBox("No unverified user logged in, or email already verified.");
-        }
-    }
-
-    // --- Event Listeners for UI Interactions ---
-
-    /**
-     * @description Event listener for the "Add Task" button click.
-     * Calls `addTaskToFirestore` with the current values from the task, due date, time, and category input fields.
-     */
-    addTaskBtn.addEventListener('click', () => addTaskToFirestore(taskInput.value, dueDateInput.value, dueTimeInput.value, categoryInput.value.trim()));
-
-    /**
-     * @description Event listener for the task input field's `keypress` event.
-     * If the 'Enter' key is pressed, it calls `addTaskToFirestore` to add the task.
-     */
-    taskInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            addTaskToFirestore(taskInput.value, dueDateInput.value, dueTimeInput.value, categoryInput.value.trim());
-        }
-    });
-
-    /**
-     * @description Event listener for the "Log In" button click.
-     * Calls the `handleLogin` function to attempt user authentication.
-     */
-    loginBtn.addEventListener('click', handleLogin);
-
-    /**
-     * @description Event listener for the "Sign Up" button click.
-     * Calls the `handleSignUp` function to attempt user registration.
-     */
-    signupBtn.addEventListener('click', handleSignUp);
-
-    /**
-     * @description Event listener for the "Log Out" button click.
-     * Calls the `handleLogout` function to sign out the current user.
-     */
-    // logoutBtn.addEventListener('click', handleLogout); // Now attached in settings section
-
-    /**
-     * @description Event listener for the "Forgot Password?" button click.
-     * Calls the `handleForgotPassword` function to initiate a password reset.
-     */
-    forgotPasswordBtn.addEventListener('click', handleForgotPassword);
-
-    /**
-     * @description Event listener for the "Resend Verification" button click.
-     * Calls the `handleResendVerificationEmail` function to resend the email verification link.
-     */
-    resendVerificationBtn.addEventListener('click', handleResendVerificationEmail);
-
-    /**
-     * @description Event listener for the filter dropdown (`filterSelect`) change event.
-     * Updates the `currentFilter` state and triggers a re-fetch and re-render of tasks.
-     */
-    filterSelect.addEventListener('change', (e) => {
-        currentFilter = e.target.value;
-        setupRealtimeListener(); // Re-fetch and re-render with the new filter
-    });
-
-    /**
-     * @description Event listener for the sort dropdown (`sortSelect`) change event.
-     * Updates the `currentSort` state and triggers a re-fetch and re-render of tasks.
-     */
-    sortSelect.addEventListener('change', (e) => {
-        currentSort = e.target.value;
-        setupRealtimeListener(); // Re-fetch and re-render with the new sort
-    });
-
-    /**
-     * @description Event listener for the "Feedback & Ideas" button to open the Fider board in a new tab.
-     * This approach avoids third-party cookie issues encountered with iframes.
-     */
-    // openFiderBtn.addEventListener('click', () => { // Now attached in settings section
-    //     window.open('https://echotasks.fider.io/', '_blank'); // Opens Fider in a new tab
-    // });
-
-    /**
-     * @description Event listener for the email input field's `keypress` event.
-     * If the 'Enter' key is pressed, it moves focus to the password input field.
-     */
-    emailInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            passwordInput.focus(); // Move focus to the password field
-        }
-    });
-
-    /**
-     * @description Event listener for the password input field's `keypress` event.
-     * If the 'Enter' key is pressed, it attempts to log in by calling `handleLogin`.
-     */
-    passwordInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            handleLogin(); // Attempt to log in
-        }
-    });
-
-    // Event Listeners for new Navbar and Settings
-    settingsBtn.addEventListener('click', toggleSettingsMenu);
-    darkModeToggleBtn.addEventListener('click', toggleDarkMode);
-    passwordChangeBtn.addEventListener('click', handlePasswordChange);
-    deleteAccountBtn.addEventListener('click', handleDeleteAccount);
-    addProfileInfoBtn.addEventListener('click', handleAddProfileInfo);
-    exportDataBtn.addEventListener('click', handleExportData);
-    openFiderBtn.addEventListener('click', () => { // Re-attached here as it's now a menu item
-        window.open('https://echotasks.fider.io/', '_blank'); // Opens Fider in a new tab
-        settingsMenu.classList.add('hidden'); // Close menu after opening new tab
-    });
-    logoutBtn.addEventListener('click', handleLogout); // Re-attached here as it's now a menu item
-
-
-    // Close settings menu if clicking outside
-    document.addEventListener('click', (event) => {
-        // Check if the click was outside the settings button and the settings menu itself
-        if (!settingsMenu.contains(event.target) && !settingsBtn.contains(event.target) && !settingsMenu.classList.contains('hidden')) {
-            settingsMenu.classList.add('hidden');
-        }
-    });
-
-    // Apply saved theme on initial load
-    applySavedTheme();
-
-    /**
-     * @description Initializes Firebase and sets up the authentication listener
-     * once the entire window has finished loading. This is the entry point of the application's JavaScript.
-     */
-    window.onload = initializeFirebase;
-</script>
+<script type="module" src="script.js"></script>
 </body>
 </html>
