@@ -65,7 +65,11 @@ const sortSelect = document.getElementById('sortSelect');
 
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsMenu = document.getElementById('settingsMenu');
+// Theme Elements
+const themeSelect = document.getElementById('themeSelect');
 const darkModeToggleBtn = document.getElementById('darkModeToggleBtn');
+const displayModeText = document.getElementById('displayModeText');
+
 const passwordChangeBtn = document.getElementById('passwordChangeBtn');
 const deleteAccountBtn = document.getElementById('deleteAccountBtn');
 const addProfileInfoBtn = document.getElementById('addProfileInfoBtn');
@@ -78,7 +82,63 @@ const messageText = document.getElementById('messageText');
 const messageBoxCloseBtn = document.getElementById('messageBoxCloseBtn');
 
 let draggedItem = null;
-let isDarkMode = false;
+
+// --- New Theme & Display Mode Logic ---
+
+/**
+ * @function setTheme
+ * @description Updates the data-theme attribute on the HTML element and saves preference.
+ * @param {string} themeName - The value of the theme (e.g., "theme1")
+ */
+function setTheme(themeName) {
+    document.documentElement.setAttribute('data-theme', themeName);
+    localStorage.setItem('selectedTheme', themeName);
+    // Sync the dropdown value just in case
+    if(themeSelect) themeSelect.value = themeName;
+}
+
+/**
+ * @function setDisplayMode
+ * @description Updates the data-display attribute (light/dark) and saves preference.
+ * @param {string} mode - "light" or "dark"
+ */
+function setDisplayMode(mode) {
+    document.documentElement.setAttribute('data-display', mode);
+    localStorage.setItem('displayMode', mode);
+    
+    // Update button text to reflect current state or next action
+    if (displayModeText) {
+        displayModeText.textContent = mode === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode";
+    }
+}
+
+/**
+ * @function toggleDisplayMode
+ * @description Toggles between light and dark display modes.
+ */
+function toggleDisplayMode() {
+    const currentMode = document.documentElement.getAttribute('data-display') || 'light';
+    const newMode = currentMode === 'dark' ? 'light' : 'dark';
+    setDisplayMode(newMode);
+    // Keep menu open or close it? Let's keep it open for user convenience
+}
+
+/**
+ * @function applySavedPreferences
+ * @description Loads saved theme and display mode from localStorage on startup.
+ */
+function applySavedPreferences() {
+    // 1. Load Theme (Default to theme1)
+    const savedTheme = localStorage.getItem('selectedTheme') || 'theme1';
+    setTheme(savedTheme);
+
+    // 2. Load Display Mode (Default to light)
+    const savedMode = localStorage.getItem('displayMode') || 'light';
+    setDisplayMode(savedMode);
+}
+
+// --- End New Logic ---
+
 
 function showMessageBox(message) {
     messageText.textContent = message;
@@ -93,30 +153,6 @@ function toggleSettingsMenu() {
     settingsMenu.classList.toggle('hidden');
 }
 
-function toggleDarkMode() {
-    const htmlElement = document.documentElement;
-    if (htmlElement.classList.contains('dark')) {
-        htmlElement.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
-        isDarkMode = false;
-    } else {
-        htmlElement.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
-        isDarkMode = true;
-    }
-    settingsMenu.classList.add('hidden');
-}
-
-function applySavedTheme() {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-        isDarkMode = true;
-    } else {
-        document.documentElement.classList.remove('dark');
-        isDarkMode = false;
-    }
-}
 
 function handlePasswordChange() {
     showMessageBox("To change your password, please use the 'Forgot Password?' link on the login page. This ensures a secure process.");
@@ -286,7 +322,10 @@ function displayTask(task) {
         const boundingBox = listItem.getBoundingClientRect();
         const offset = boundingBox.y + (boundingBox.height / 2);
 
-        const accentColor = '#7554AE';
+        // Get the computed primary color for the border to match theme
+        // We can't use 'var(--primary)' directly in JS logic easily without fetching it
+        // But we can set the style using the variable string!
+        const accentColor = 'var(--primary)';
 
         if (e.clientY < offset) {
             listItem.style.borderTop = '2px solid ' + accentColor;
@@ -656,7 +695,11 @@ passwordInput.addEventListener('keypress', (e) => {
 });
 
 settingsBtn.addEventListener('click', toggleSettingsMenu);
-darkModeToggleBtn.addEventListener('click', toggleDarkMode);
+
+// Update listeners for new controls
+themeSelect.addEventListener('change', (e) => setTheme(e.target.value));
+darkModeToggleBtn.addEventListener('click', toggleDisplayMode); // Changed from toggleDarkMode
+
 passwordChangeBtn.addEventListener('click', handlePasswordChange);
 deleteAccountBtn.addEventListener('click', handleDeleteAccount);
 addProfileInfoBtn.addEventListener('click', handleAddProfileInfo);
@@ -673,6 +716,7 @@ document.addEventListener('click', (event) => {
     }
 });
 
-applySavedTheme();
+// Use new init function
+applySavedPreferences();
 
 window.onload = initializeFirebase;
