@@ -1,192 +1,398 @@
 <!DOCTYPE html>
-<!--suppress HtmlFormInputWithoutLabel -->
 <html lang="en" data-theme="theme1" data-display="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced To-Do List App</title>
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!--Vanilla JS File-->
-    <script type="module" src="script.js" defer></script>
-    <!-- Vanilla CSS File -->
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EchoTasks — A clean, real-time to-do list app powered by Firebase.">
+  <title>EchoTasks — Advanced To-Do List</title>
+
+  <!-- Preconnect for faster font load -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Application CSS -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Application JS (module, deferred) -->
+  <script type="module" src="script.js" defer></script>
 </head>
+
 <body>
-<!-- data-theme and data-display will be set by JS on the html element, but we default here to prevent flash -->
-<nav class="app-nav">
+
+  <!-- ====================================================
+       Navigation Bar
+       ==================================================== -->
+  <nav class="app-nav" role="navigation" aria-label="Main navigation">
+    <!-- Left spacer keeps title visually centred -->
+    <div class="nav-spacer" aria-hidden="true"></div>
+
     <div class="nav-title">
-        <h1>ECHO TASKS</h1>
+      <h1>ECHO TASKS</h1>
     </div>
+
+    <!-- Settings dropdown -->
     <div class="relative-container">
-        <button id="settingsBtn" class="btn-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-more-horizontal">
-                <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+      <button
+        id="settingsBtn"
+        class="btn-icon"
+        aria-haspopup="true"
+        aria-expanded="false"
+        aria-controls="settingsMenu"
+        aria-label="Open settings menu"
+        title="Settings"
+      >
+        <!-- Horizontal ellipsis icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="1"/>
+          <circle cx="19" cy="12" r="1"/>
+          <circle cx="5"  cy="12" r="1"/>
+        </svg>
+      </button>
+
+      <div id="settingsMenu" class="dropdown-menu hidden" role="menu" aria-label="Settings">
+
+        <!-- Theme Selector -->
+        <div class="theme-selector-container">
+          <label for="themeSelect" class="theme-label">Colour Theme</label>
+          <select id="themeSelect" class="theme-select" aria-label="Select colour theme">
+            <option value="theme1">🌿 Calm Minimal</option>
+            <option value="theme2">💙 Modern Cool Blue</option>
+            <option value="theme3">🔥 Energetic Orange</option>
+            <option value="theme4">🌸 Soft Pink Pastel</option>
+            <option value="theme5">🪵 Warm Earth Tones</option>
+            <option value="theme6">✨ Vibrant Purple</option>
+            <option value="theme7">🌊 Dark Mode Teal</option>
+            <option value="theme8">☀️ Positive Yellow</option>
+            <option value="theme9">🎨 Playful Colorful</option>
+            <option value="theme10">❄️ Frosty Blue-Gray</option>
+          </select>
+        </div>
+
+        <div class="dropdown-separator" role="separator"></div>
+
+        <!-- Light / Dark Mode Toggle -->
+        <button id="darkModeToggleBtn" class="dropdown-item" role="menuitem">
+          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5Z"/>
+          </svg>
+          <span id="displayModeText">Switch to Dark Mode</span>
+        </button>
+
+        <div class="dropdown-separator" role="separator"></div>
+
+        <!-- Account Actions -->
+        <button id="passwordChangeBtn" class="dropdown-item" role="menuitem">
+          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.778-7.778z"/>
+            <path d="m15.5 6.5 3.5-3.5L22 7l-3.5 3.5"/>
+            <path d="M12 12 2 22Z"/>
+          </svg>
+          <span>Change Password</span>
+        </button>
+
+        <button id="addProfileInfoBtn" class="dropdown-item" role="menuitem">
+          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <line x1="19" x2="19" y1="8" y2="14"/>
+            <line x1="22" x2="16" y1="11" y2="11"/>
+          </svg>
+          <span>Add Profile Info</span>
+        </button>
+
+        <button id="exportDataBtn" class="dropdown-item" role="menuitem">
+          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" x2="12" y1="15" y2="3"/>
+          </svg>
+          <span>Export Data (PDF)</span>
+        </button>
+
+        <!-- Feedback — hover reveals instructions -->
+        <div class="fider-button-wrapper">
+          <button id="openFiderBtn" class="dropdown-item" role="menuitem">
+            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>
+            <span>Feedback &amp; Ideas</span>
+          </button>
+          <div class="fider-instructions-dropdown" aria-live="polite">
+            <p class="font-semibold mb-2">How to use Fider.io:</p>
+            <ul class="fider-list">
+              <li>Click "Feedback &amp; Ideas" to open the board in a new tab.</li>
+              <li>Sign in or create a Fider.io account (separate from your to-do account).</li>
+              <li>Submit ideas, vote, and comment to help improve the app!</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="dropdown-separator" role="separator"></div>
+
+        <!-- Session Actions -->
+        <button id="logoutBtn" class="dropdown-item" role="menuitem">
+          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="17 16 22 12 17 8"/>
+            <line x1="22" x2="11" y1="12" y2="12"/>
+          </svg>
+          <span>Log Out</span>
         </button>
-        <div id="settingsMenu" class="dropdown-menu hidden">
-            <!-- Theme Selector Section -->
-            <div class="theme-selector-container">
-                <label for="themeSelect" class="theme-label">Select Theme</label>
-                <select id="themeSelect" class="theme-select">
-                    <option value="theme1">Calm Minimal</option>
-                    <option value="theme2">Modern Cool Blue</option>
-                    <option value="theme3">Energetic Orange</option>
-                    <option value="theme4">Soft Pink Pastel</option>
-                    <option value="theme5">Warm Earth Tones</option>
-                    <option value="theme6">Vibrant Purple</option>
-                    <option value="theme7">Dark Mode Teal</option>
-                    <option value="theme8">Positive Yellow</option>
-                    <option value="theme9">Playful Colorful</option>
-                    <option value="theme10">Frosty Blue-Gray</option>
-                </select>
-            </div>
 
-            <!-- Light/Dark Toggle -->
-            <button id="darkModeToggleBtn" class="dropdown-item">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun-moon">
-                    <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5Z"/>
-                </svg>
-                <span id="displayModeText">Light/Dark Mode</span>
-            </button>
+        <button id="deleteAccountBtn" class="dropdown-item" role="menuitem" style="color: var(--color-danger);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 6h18"/>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+            <line x1="10" x2="10" y1="11" y2="17"/>
+            <line x1="14" x2="14" y1="11" y2="17"/>
+          </svg>
+          <span>Delete Account</span>
+        </button>
 
-            <button id="passwordChangeBtn" class="dropdown-item">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key">
-                    <path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.778-7.778z"/><path d="m15.5 6.5 3.5-3.5L22 7l-3.5 3.5"/><path d="M12 12 2 22Z"/>
-                </svg>
-                <span>Change Password</span>
-            </button>
-            <button id="addProfileInfoBtn" class="dropdown-item">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-plus">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/>
-                </svg>
-                <span>Add Profile Info</span>
-            </button>
-            <button id="exportDataBtn" class="dropdown-item">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>
-                </svg>
-                <span>Export Data (PDF)</span>
-            </button>
-            <div class="fider-button-wrapper">
-                <button id="openFiderBtn" class="dropdown-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V3a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                    </svg>
-                    <span>Feedback & Ideas</span>
-                </button>
-                <div class="fider-instructions-dropdown">
-                    <p class="font-semibold mb-1">How to use Fider.io:</p>
-                    <ul class="fider-list">
-                        <li>Click the "Feedback & Ideas" button.</li>
-                        <li>You will be redirected to the Fider.io board in a new tab.</li>
-                        <li>Sign in or create an account on Fider.io (this is separate from your To-Do app account).</li>
-                        <li>Once logged in, you can submit new ideas, vote on existing ones, and comment.</li>
-                        <li>Your feedback helps improve this app!</li>
-                    </ul>
-                </div>
-            </div>
-            <button id="logoutBtn" class="dropdown-item">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="17 16 22 12 17 8"/><line x1="22" x2="11" y1="12" y2="12"/>
-                </svg>
-                <span>Log Out</span>
-            </button>
-            <button id="deleteAccountBtn" class="dropdown-item">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2">
-                    <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>
-                </svg>
-                <span>Delete Account</span>
-            </button>
-        </div>
-    </div>
-</nav>
-<main class="main-content">
-    <div id="authContainer" class="card-container hidden">
-        <h1 class="card-title">Welcome</h1>
-        <p class="card-subtitle">Sign in or create an account to manage your tasks.</p>
+      </div><!-- /#settingsMenu -->
+    </div><!-- /.relative-container -->
+  </nav>
 
-        <div class="form-group">
-            <label for="emailInput" class="form-label">Email:</label>
-            <input type="email" id="emailInput" placeholder="your@example.com" class="input-base">
-        </div>
-        <div class="form-group mb-6">
-            <label for="passwordInput" class="form-label">Password:</label>
-            <input type="password" id="passwordInput" placeholder="********" class="input-base">
-        </div>
+  <!-- ====================================================
+       Main Content
+       ==================================================== -->
+  <main class="main-content" role="main">
 
-        <!-- Corrected Auth Action Buttons -->
-        <p class="text-center text-sm font-medium mb-2" style="color: var(--primary);">First Time User? Please Press "Sign Up"!</p>
-        <div class="auth-actions">
-            <button id="loginBtn" class="btn-primary">Log In</button>
-            <button id="signupBtn" class="btn-secondary">Sign Up</button>
-        </div>
-        <button id="forgotPasswordBtn" class="btn-link mt-2 text-center w-full">Forgot Password?</button>
-    </div>
+    <!-- ── Auth Card ─────────────────────────────────── -->
+    <section
+      id="authContainer"
+      class="card-container hidden"
+      aria-label="Authentication"
+    >
+      <h2 class="card-title">Welcome Back</h2>
+      <p class="card-subtitle">Sign in to your account or create a new one to manage your tasks.</p>
 
-    <div id="todoContainer" class="card-container hidden">
-        <h1 class="card-title">My To-Do List</h1>
+      <p class="text-center text-sm font-semibold mb-4" style="color: var(--primary);">
+        First time here? Press <strong>Sign Up</strong> below!
+      </p>
 
-        <div class="mb-4 text-center">
-            <div id="userIdDisplay" class="text-sm text-muted mb-1 break-words hidden">
-                Loading user...
-            </div>
-            <div id="emailVerificationMessage" class="text-danger font-semibold mb-2 hidden">
-                Email not verified. <button id="resendVerificationBtn" class="btn-link underline">Resend</button>
-            </div>
+      <div class="form-group">
+        <label for="emailInput" class="form-label">Email address</label>
+        <input
+          type="email"
+          id="emailInput"
+          class="input-base"
+          placeholder="you@example.com"
+          autocomplete="email"
+          inputmode="email"
+          spellcheck="false"
+          required
+        >
+      </div>
+
+      <div class="form-group mb-6">
+        <label for="passwordInput" class="form-label">Password</label>
+        <input
+          type="password"
+          id="passwordInput"
+          class="input-base"
+          placeholder="••••••••"
+          autocomplete="current-password"
+          required
+        >
+      </div>
+
+      <div class="auth-actions">
+        <button id="loginBtn"  class="btn-primary"   type="button">Log In</button>
+        <button id="signupBtn" class="btn-secondary"  type="button">Sign Up</button>
+      </div>
+
+      <div class="text-center mt-2">
+        <button id="forgotPasswordBtn" class="btn-link" type="button">
+          Forgot your password?
+        </button>
+      </div>
+    </section><!-- /#authContainer -->
+
+
+    <!-- ── To-Do Card ────────────────────────────────── -->
+    <section
+      id="todoContainer"
+      class="card-container hidden"
+      aria-label="Task manager"
+    >
+      <header class="section-header">
+        <h2 class="card-title mb-0" style="text-align:left;">My Tasks</h2>
+        <span id="taskCountBadge" class="task-count-badge hidden" aria-live="polite" aria-label="Task count">0</span>
+      </header>
+
+      <!-- User info -->
+      <div class="user-info-row">
+        <div id="userIdDisplay" class="user-id-badge hidden" aria-live="polite" aria-label="Logged-in user ID">
+          Loading…
         </div>
 
-        <div class="input-group-row">
-            <input type="text" id="taskInput" placeholder="Add a new task..." class="input-base input-grow">
-            <input type="date" id="dueDateInput" class="input-base auto-width">
-            <input type="time" id="dueTimeInput" class="input-base auto-width">
-            <input type="text" id="categoryInput" placeholder="Category" class="input-base auto-width">
+        <div id="emailVerificationMessage" class="verification-banner hidden" role="alert">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          Email not verified.
+          <button id="resendVerificationBtn" class="btn-link underline" type="button">
+            Resend verification
+          </button>
         </div>
-        <div class="flex gap-2 mb-6">
-            <button id="addTaskBtn" class="btn-primary">Add Task</button>
-        </div>
+      </div><!-- /.user-info-row -->
 
-        <div class="filter-row">
-            <div class="filter-group">
-                <label for="filterSelect" class="form-label mr-2 mb-0">Show:</label>
-                <select id="filterSelect" class="filter-select">
-                    <option value="all">All</option>
-                    <option value="active">Active</option>
-                    <option value="completed">Completed</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="sortSelect" class="form-label mr-2 mb-0">Sort by:</label>
-                <select id="sortSelect" class="filter-select">
-                    <option value="timestamp_asc">Oldest First</option>
-                    <option value="timestamp_desc">Newest First</option>
-                    <option value="dueDate_asc">Due Date (Asc)</option>
-                    <option value="dueDate_desc">Due Date (Desc)</option>
-                    <option value="text_asc">Alphabetical (A-Z)</option>
-                    <option value="text_desc">Alphabetical (Z-A)</option>
-                </select>
-            </div>
-        </div>
+      <!-- Task Input Group -->
+      <div class="task-input-group" role="group" aria-label="Add new task">
 
-        <ul id="taskList" class="task-list">
-        </ul>
-
-        <div id="loadingIndicator" class="text-center text-muted mt-4 hidden">
-            Loading tasks...
+        <!-- Row 1: main text input -->
+        <div class="task-input-main">
+          <label for="taskInput" class="form-label">New task</label>
+          <input
+            type="text"
+            id="taskInput"
+            class="input-base"
+            placeholder="What needs to be done?"
+            autocomplete="off"
+            spellcheck="true"
+            maxlength="300"
+          >
         </div>
 
-    </div>
-</main>
+        <!-- Row 2: date, time, category -->
+        <div class="task-input-meta">
+          <label for="dueDateInput" class="form-label hidden">Due date</label>
+          <input
+            type="date"
+            id="dueDateInput"
+            class="input-base"
+            aria-label="Due date"
+            title="Due date"
+          >
 
-<div id="messageBox" class="modal-overlay hidden">
+          <label for="dueTimeInput" class="form-label hidden">Due time</label>
+          <input
+            type="time"
+            id="dueTimeInput"
+            class="input-base"
+            aria-label="Due time"
+            title="Due time"
+          >
+
+          <label for="categoryInput" class="form-label hidden">Category</label>
+          <input
+            type="text"
+            id="categoryInput"
+            class="input-base"
+            placeholder="Category"
+            aria-label="Task category"
+            autocomplete="off"
+            maxlength="50"
+          >
+        </div>
+
+      </div><!-- /.task-input-group -->
+
+      <!-- Add Button -->
+      <div class="task-add-actions mb-6">
+        <button id="addTaskBtn" class="btn-primary" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5"  y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Task
+        </button>
+      </div>
+
+      <!-- Filter & Sort Controls -->
+      <div class="filter-row" role="group" aria-label="Filter and sort tasks">
+        <div class="filter-group">
+          <label for="filterSelect" class="form-label mb-0">Show:</label>
+          <select id="filterSelect" class="filter-select" aria-label="Filter tasks by status">
+            <option value="all">All</option>
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="sortSelect" class="form-label mb-0">Sort:</label>
+          <select id="sortSelect" class="filter-select" aria-label="Sort tasks by">
+            <option value="timestamp_asc">Oldest first</option>
+            <option value="timestamp_desc">Newest first</option>
+            <option value="dueDate_asc">Due date ↑</option>
+            <option value="dueDate_desc">Due date ↓</option>
+            <option value="text_asc">A → Z</option>
+            <option value="text_desc">Z → A</option>
+          </select>
+        </div>
+      </div><!-- /.filter-row -->
+
+      <!-- Task List -->
+      <ul id="taskList" class="task-list" role="list" aria-label="Task list" aria-live="polite"></ul>
+
+      <!-- Loading Indicator -->
+      <div id="loadingIndicator" class="loading-indicator hidden" role="status" aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
+        <span>Loading tasks…</span>
+      </div>
+
+      <!-- Empty State (shown by JS when list is empty) -->
+      <div id="emptyState" class="empty-state hidden" aria-live="polite">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="1.25"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <line x1="9"  y1="9"  x2="9.01"  y2="9"/>
+          <line x1="15" y1="9"  x2="15.01" y2="9"/>
+          <path d="M9 13h6"/>
+        </svg>
+        <p class="empty-state-title">No tasks here</p>
+        <p class="empty-state-subtitle">Add your first task above to get started.</p>
+      </div>
+
+    </section><!-- /#todoContainer -->
+
+  </main><!-- /.main-content -->
+
+
+  <!-- ====================================================
+       Message / Alert Modal
+       ==================================================== -->
+  <div
+    id="messageBox"
+    class="modal-overlay hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="messageText"
+  >
     <div class="modal-content">
-        <p id="messageText" class="text-lg font-semibold mb-4"></p>
-        <button id="messageBoxCloseBtn" class="btn-primary w-full">
-            OK
-        </button>
+      <p id="messageText"></p>
+      <button id="messageBoxCloseBtn" class="btn-primary btn-auto w-full" type="button">
+        OK
+      </button>
     </div>
-</div>
-
+  </div>
 
 </body>
 </html>

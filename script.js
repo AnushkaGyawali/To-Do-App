@@ -1,722 +1,795 @@
+/**
+ * EchoTasks — script.js
+ * Firebase v9 modular SDK + vanilla JS
+ * Handles: auth, real-time task CRUD, drag-and-drop reorder,
+ *          theme / display-mode persistence, settings menu.
+ */
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 import {
-    getAuth,
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    onAuthStateChanged,
-    signOut,
-    sendEmailVerification,
-    sendPasswordResetEmail,
-    deleteUser
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  deleteUser,
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 import {
-    getFirestore,
-    collection,
-    addDoc,
-    updateDoc,
-    deleteDoc,
-    doc,
-    onSnapshot,
-    query,
-    getDocs
+  getFirestore,
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+  getDocs,
+  writeBatch,   // ← v9 batch API (replaces the broken db.batch())
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
+/* ------------------------------------------------------------------
+   Firebase config
+   ------------------------------------------------------------------ */
 const firebaseConfig = {
-    apiKey: "AIzaSyB7ZesRhCUfElvv58AyzSQjXcP_dqbFH_4",
-    authDomain: "my-to-do-app-cd314.firebaseapp.com",
-    projectId: "my-to-do-app-cd314",
-    storageBucket: "my-to-do-app-cd314.firebasestorage.app",
-    messagingSenderId: "184421960045",
-    appId: "1:184421960045:web:57b0e84b5b38ebaf27b264",
-    measurementId: "G-S0VBJXLSDX"
+  apiKey:            "AIzaSyB7ZesRhCUfElvv58AyzSQjXcP_dqbFH_4",
+  authDomain:        "my-to-do-app-cd314.firebaseapp.com",
+  projectId:         "my-to-do-app-cd314",
+  storageBucket:     "my-to-do-app-cd314.firebasestorage.app",
+  messagingSenderId: "184421960045",
+  appId:             "1:184421960045:web:57b0e84b5b38ebaf27b264",
+  measurementId:     "G-S0VBJXLSDX",
 };
 
+/* ------------------------------------------------------------------
+   App state
+   ------------------------------------------------------------------ */
 const appId = firebaseConfig.projectId;
-let app;
-let db;
-let auth;
-let currentUser = null;
-let userId = null;
-let isAuthReady = false;
+
+let app, db, auth;
+let currentUser       = null;
+let userId            = null;
+let isAuthReady       = false;
 let unsubscribeFromTasks = null;
-let currentFilter = 'all';
-let currentSort = 'timestamp_asc';
+let currentFilter     = "all";
+let currentSort       = "timestamp_asc";
+let draggedItem       = null;
 
-const authContainer = document.getElementById('authContainer');
-const emailInput = document.getElementById('emailInput');
-const passwordInput = document.getElementById('passwordInput');
-const loginBtn = document.getElementById('loginBtn');
-const signupBtn = document.getElementById('signupBtn');
-const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+/* ------------------------------------------------------------------
+   DOM references
+   ------------------------------------------------------------------ */
 
-const todoContainer = document.getElementById('todoContainer');
-const taskInput = document.getElementById('taskInput');
-const dueDateInput = document.getElementById('dueDateInput');
-const dueTimeInput = document.getElementById('dueTimeInput');
-const categoryInput = document.getElementById('categoryInput');
-const addTaskBtn = document.getElementById('addTaskBtn');
-const taskList = document.getElementById('taskList');
-const userIdDisplay = document.getElementById('userIdDisplay');
-const emailVerificationMessage = document.getElementById('emailVerificationMessage');
-const resendVerificationBtn = document.getElementById('resendVerificationBtn');
-const loadingIndicator = document.getElementById('loadingIndicator');
-const filterSelect = document.getElementById('filterSelect');
-const sortSelect = document.getElementById('sortSelect');
+// Auth
+const authContainer      = document.getElementById("authContainer");
+const emailInput         = document.getElementById("emailInput");
+const passwordInput      = document.getElementById("passwordInput");
+const loginBtn           = document.getElementById("loginBtn");
+const signupBtn          = document.getElementById("signupBtn");
+const forgotPasswordBtn  = document.getElementById("forgotPasswordBtn");
 
-const settingsBtn = document.getElementById('settingsBtn');
-const settingsMenu = document.getElementById('settingsMenu');
-// Theme Elements
-const themeSelect = document.getElementById('themeSelect');
-const darkModeToggleBtn = document.getElementById('darkModeToggleBtn');
-const displayModeText = document.getElementById('displayModeText');
+// Todo
+const todoContainer           = document.getElementById("todoContainer");
+const taskInput               = document.getElementById("taskInput");
+const dueDateInput            = document.getElementById("dueDateInput");
+const dueTimeInput            = document.getElementById("dueTimeInput");
+const categoryInput           = document.getElementById("categoryInput");
+const addTaskBtn              = document.getElementById("addTaskBtn");
+const taskList                = document.getElementById("taskList");
+const userIdDisplay           = document.getElementById("userIdDisplay");
+const emailVerificationMessage = document.getElementById("emailVerificationMessage");
+const resendVerificationBtn   = document.getElementById("resendVerificationBtn");
+const loadingIndicator        = document.getElementById("loadingIndicator");
+const filterSelect            = document.getElementById("filterSelect");
+const sortSelect              = document.getElementById("sortSelect");
+const emptyState              = document.getElementById("emptyState");
+const taskCountBadge          = document.getElementById("taskCountBadge");
 
-const passwordChangeBtn = document.getElementById('passwordChangeBtn');
-const deleteAccountBtn = document.getElementById('deleteAccountBtn');
-const addProfileInfoBtn = document.getElementById('addProfileInfoBtn');
-const exportDataBtn = document.getElementById('exportDataBtn');
-const openFiderBtn = document.getElementById('openFiderBtn');
-const logoutBtn = document.getElementById('logoutBtn');
+// Settings
+const settingsBtn         = document.getElementById("settingsBtn");
+const settingsMenu        = document.getElementById("settingsMenu");
+const themeSelect         = document.getElementById("themeSelect");
+const darkModeToggleBtn   = document.getElementById("darkModeToggleBtn");
+const displayModeText     = document.getElementById("displayModeText");
+const passwordChangeBtn   = document.getElementById("passwordChangeBtn");
+const deleteAccountBtn    = document.getElementById("deleteAccountBtn");
+const addProfileInfoBtn   = document.getElementById("addProfileInfoBtn");
+const exportDataBtn       = document.getElementById("exportDataBtn");
+const openFiderBtn        = document.getElementById("openFiderBtn");
+const logoutBtn           = document.getElementById("logoutBtn");
 
-const messageBox = document.getElementById('messageBox');
-const messageText = document.getElementById('messageText');
-const messageBoxCloseBtn = document.getElementById('messageBoxCloseBtn');
+// Modal
+const messageBox         = document.getElementById("messageBox");
+const messageText        = document.getElementById("messageText");
+const messageBoxCloseBtn = document.getElementById("messageBoxCloseBtn");
 
-let draggedItem = null;
-
-// --- New Theme & Display Mode Logic ---
+/* ==================================================================
+   THEME & DISPLAY MODE
+   ================================================================== */
 
 /**
- * @function setTheme
- * @description Updates the data-theme attribute on the HTML element and saves preference.
- * @param {string} themeName - The value of the theme (e.g., "theme1")
+ * Apply a named theme to <html> and persist it.
+ * @param {string} themeName - e.g. "theme2"
  */
 function setTheme(themeName) {
-    document.documentElement.setAttribute('data-theme', themeName);
-    localStorage.setItem('selectedTheme', themeName);
-    // Sync the dropdown value just in case
-    if(themeSelect) themeSelect.value = themeName;
+  document.documentElement.setAttribute("data-theme", themeName);
+  localStorage.setItem("selectedTheme", themeName);
+  if (themeSelect) themeSelect.value = themeName;
 }
 
 /**
- * @function setDisplayMode
- * @description Updates the data-display attribute (light/dark) and saves preference.
- * @param {string} mode - "light" or "dark"
+ * Apply light or dark display mode and persist it.
+ * @param {"light"|"dark"} mode
  */
 function setDisplayMode(mode) {
-    document.documentElement.setAttribute('data-display', mode);
-    localStorage.setItem('displayMode', mode);
-    
-    // Update button text to reflect current state or next action
-    if (displayModeText) {
-        displayModeText.textContent = mode === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode";
-    }
+  document.documentElement.setAttribute("data-display", mode);
+  localStorage.setItem("displayMode", mode);
+  if (displayModeText) {
+    displayModeText.textContent =
+      mode === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode";
+  }
 }
 
-/**
- * @function toggleDisplayMode
- * @description Toggles between light and dark display modes.
- */
+/** Toggle between light and dark. */
 function toggleDisplayMode() {
-    const currentMode = document.documentElement.getAttribute('data-display') || 'light';
-    const newMode = currentMode === 'dark' ? 'light' : 'dark';
-    setDisplayMode(newMode);
-    // Keep menu open or close it? Let's keep it open for user convenience
+  const current = document.documentElement.getAttribute("data-display") || "light";
+  setDisplayMode(current === "dark" ? "light" : "dark");
 }
 
-/**
- * @function applySavedPreferences
- * @description Loads saved theme and display mode from localStorage on startup.
- */
+/** Load saved theme / mode preferences from localStorage on startup. */
 function applySavedPreferences() {
-    // 1. Load Theme (Default to theme1)
-    const savedTheme = localStorage.getItem('selectedTheme') || 'theme1';
-    setTheme(savedTheme);
-
-    // 2. Load Display Mode (Default to light)
-    const savedMode = localStorage.getItem('displayMode') || 'light';
-    setDisplayMode(savedMode);
+  setTheme(localStorage.getItem("selectedTheme") || "theme1");
+  setDisplayMode(localStorage.getItem("displayMode") || "light");
 }
 
-// --- End New Logic ---
-
+/* ==================================================================
+   MODAL (message box)
+   ================================================================== */
 
 function showMessageBox(message) {
-    messageText.textContent = message;
-    messageBox.classList.remove('hidden');
+  messageText.textContent = message;
+  messageBox.classList.remove("hidden");
+  messageBoxCloseBtn.focus();
 }
 
-messageBoxCloseBtn.addEventListener('click', () => {
-    messageBox.classList.add('hidden');
+messageBoxCloseBtn.addEventListener("click", () => {
+  messageBox.classList.add("hidden");
 });
 
-function toggleSettingsMenu() {
-    settingsMenu.classList.toggle('hidden');
+// Close modal on overlay click
+messageBox.addEventListener("click", (e) => {
+  if (e.target === messageBox) messageBox.classList.add("hidden");
+});
+
+// Close modal on Escape key
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !messageBox.classList.contains("hidden")) {
+    messageBox.classList.add("hidden");
+  }
+});
+
+/* ==================================================================
+   SETTINGS MENU
+   ================================================================== */
+
+function openSettingsMenu() {
+  settingsMenu.classList.remove("hidden");
+  settingsBtn.setAttribute("aria-expanded", "true");
 }
 
+function closeSettingsMenu() {
+  settingsMenu.classList.add("hidden");
+  settingsBtn.setAttribute("aria-expanded", "false");
+}
+
+function toggleSettingsMenu() {
+  const isOpen = !settingsMenu.classList.contains("hidden");
+  isOpen ? closeSettingsMenu() : openSettingsMenu();
+}
+
+settingsBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  toggleSettingsMenu();
+});
+
+// Close when clicking outside
+document.addEventListener("click", (e) => {
+  if (
+    !settingsMenu.classList.contains("hidden") &&
+    !settingsMenu.contains(e.target) &&
+    !settingsBtn.contains(e.target)
+  ) {
+    closeSettingsMenu();
+  }
+});
+
+// Close on Escape
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !settingsMenu.classList.contains("hidden")) {
+    closeSettingsMenu();
+    settingsBtn.focus();
+  }
+});
+
+/* ------------------------------------------------------------------
+   Settings action handlers
+   ------------------------------------------------------------------ */
 
 function handlePasswordChange() {
-    showMessageBox("To change your password, please use the 'Forgot Password?' link on the login page. This ensures a secure process.");
-    settingsMenu.classList.add('hidden');
+  showMessageBox(
+    "To change your password, use the 'Forgot Password?' link on the login screen. This keeps the process secure."
+  );
+  closeSettingsMenu();
 }
 
 async function handleDeleteAccount() {
-    if (!currentUser) {
-        showMessageBox("You must be logged in to delete your account.");
-        settingsMenu.classList.add('hidden');
-        return;
-    }
-    showMessageBox("For security, you need to re-authenticate to delete your account. Please log out and log back in, then try deleting your account again.");
-    settingsMenu.classList.add('hidden');
+  if (!currentUser) {
+    showMessageBox("You must be logged in to delete your account.");
+    closeSettingsMenu();
+    return;
+  }
+  showMessageBox(
+    "For security, please log out and log back in, then try deleting your account again."
+  );
+  closeSettingsMenu();
 }
 
 function handleAddProfileInfo() {
-    showMessageBox("This feature is under development. You will be able to add profile information here soon!");
-    settingsMenu.classList.add('hidden');
+  showMessageBox("Profile info management is under development — coming soon!");
+  closeSettingsMenu();
 }
 
 async function handleExportData() {
-    if (!db || !userId || !isAuthReady) {
-        showMessageBox("Please log in to export your data.");
-        settingsMenu.classList.add('hidden');
-        return;
-    }
-    showMessageBox("Exporting data to PDF is under development. This feature will be available soon!");
-    settingsMenu.classList.add('hidden');
+  if (!db || !userId || !isAuthReady) {
+    showMessageBox("Please log in to export your data.");
+    closeSettingsMenu();
+    return;
+  }
+  showMessageBox("PDF export is under development — coming soon!");
+  closeSettingsMenu();
 }
+
+/* ==================================================================
+   FIREBASE INITIALISATION & AUTH
+   ================================================================== */
 
 async function initializeFirebase() {
-    try {
-        app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-        auth = getAuth(app);
+  try {
+    app  = initializeApp(firebaseConfig);
+    db   = getFirestore(app);
+    auth = getAuth(app);
 
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if (user) {
-                userId = user.uid;
-                userIdDisplay.textContent = `User ID: ${userId}`;
-                isAuthReady = true;
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
 
-                if (!user.emailVerified) {
-                    emailVerificationMessage.classList.remove('hidden');
-                } else {
-                    emailVerificationMessage.classList.add('hidden');
-                }
+      if (user) {
+        userId      = user.uid;
+        isAuthReady = true;
 
-                authContainer.classList.add('hidden');
-                todoContainer.classList.remove('hidden');
-                console.log("User signed in:", userId);
-                setupRealtimeListener();
-            } else {
-                userId = null;
-                isAuthReady = false;
-                authContainer.classList.remove('hidden');
-                todoContainer.classList.add('hidden');
-                taskList.innerHTML = '';
-                userIdDisplay.textContent = 'Please log in.';
-                emailVerificationMessage.classList.add('hidden');
-                console.log("User signed out.");
-                if (unsubscribeFromTasks) {
-                    unsubscribeFromTasks();
-                    unsubscribeFromTasks = null;
-                }
-            }
-        });
-    } catch (error) {
-        console.error("Error initializing Firebase:", error);
-        showMessageBox("Failed to initialize the application. Check console for details.");
-    }
+        // Show user ID pill
+        userIdDisplay.textContent = `UID: ${userId}`;
+        userIdDisplay.classList.remove("hidden");
+
+        // Email verification banner
+        if (!user.emailVerified) {
+          emailVerificationMessage.classList.remove("hidden");
+        } else {
+          emailVerificationMessage.classList.add("hidden");
+        }
+
+        authContainer.classList.add("hidden");
+        todoContainer.classList.remove("hidden");
+        console.log("User signed in:", userId);
+        setupRealtimeListener();
+      } else {
+        userId      = null;
+        isAuthReady = false;
+
+        authContainer.classList.remove("hidden");
+        todoContainer.classList.add("hidden");
+        taskList.innerHTML = "";
+        userIdDisplay.textContent = "";
+        userIdDisplay.classList.add("hidden");
+        emailVerificationMessage.classList.add("hidden");
+        toggleEmptyState(false); // hide while logged out
+
+        console.log("User signed out.");
+
+        if (unsubscribeFromTasks) {
+          unsubscribeFromTasks();
+          unsubscribeFromTasks = null;
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Error initialising Firebase:", error);
+    showMessageBox("Failed to initialise the application. Check the console for details.");
+  }
 }
+
+/* ==================================================================
+   REAL-TIME TASK LISTENER
+   ================================================================== */
 
 function setupRealtimeListener() {
-    if (!db || !userId || !isAuthReady) {
-        console.log("Firestore not ready or user not authenticated. Skipping listener setup.");
-        return;
+  if (!db || !userId || !isAuthReady) {
+    console.log("Firestore not ready or user not authenticated. Skipping listener.");
+    return;
+  }
+
+  loadingIndicator.classList.remove("hidden");
+  toggleEmptyState(false);
+
+  const tasksRef = collection(db, `artifacts/${appId}/users/${userId}/tasks`);
+  const q        = query(tasksRef);
+
+  if (unsubscribeFromTasks) unsubscribeFromTasks();
+
+  unsubscribeFromTasks = onSnapshot(
+    q,
+    (snapshot) => {
+      let tasks = [];
+      snapshot.forEach((d) => tasks.push({ id: d.id, ...d.data() }));
+
+      tasks = filterTasks(tasks, currentFilter);
+      tasks = sortTasks(tasks, currentSort);
+
+      taskList.innerHTML = "";
+      tasks.forEach((task) => displayTask(task));
+
+      loadingIndicator.classList.add("hidden");
+      updateTaskCount(tasks.length);
+      toggleEmptyState(tasks.length === 0);
+    },
+    (error) => {
+      console.error("Error fetching real-time tasks:", error);
+      showMessageBox("Error loading tasks. Please refresh the page.");
+      loadingIndicator.classList.add("hidden");
     }
-
-    loadingIndicator.classList.remove('hidden');
-    const tasksCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/tasks`);
-    const q = query(tasksCollectionRef);
-
-    if (unsubscribeFromTasks) {
-        unsubscribeFromTasks();
-    }
-
-    unsubscribeFromTasks = onSnapshot(q, (snapshot) => {
-        let tasks = [];
-        snapshot.forEach(doc => {
-            const taskData = doc.data();
-            tasks.push({ id: doc.id, ...taskData });
-        });
-
-        tasks = filterTasks(tasks, currentFilter);
-        tasks = sortTasks(tasks, currentSort);
-
-        taskList.innerHTML = '';
-        tasks.forEach(task => displayTask(task));
-        loadingIndicator.classList.add('hidden');
-    }, (error) => {
-        console.error("Error fetching real-time tasks:", error);
-        showMessageBox("Error loading tasks. Please refresh.");
-        loadingIndicator.classList.add('hidden');
-    });
+  );
 }
 
+/* ------------------------------------------------------------------
+   Filter & Sort helpers
+   ------------------------------------------------------------------ */
+
 function filterTasks(tasks, filter) {
-    switch (filter) {
-        case 'active':
-            return tasks.filter(task => !task.completed);
-        case 'completed':
-            return tasks.filter(task => task.completed);
-        case 'all':
-        default:
-            return tasks;
-    }
+  switch (filter) {
+    case "active":    return tasks.filter((t) => !t.completed);
+    case "completed": return tasks.filter((t) =>  t.completed);
+    default:          return tasks;
+  }
 }
 
 function sortTasks(tasks, sortOrder) {
-    return tasks.sort((a, b) => {
-        const createDateTime = (dateStr, timeStr) => {
-            if (!dateStr) return null;
-            const fullDateTimeStr = `${dateStr}T${timeStr || '00:00'}:00`;
-            return new Date(fullDateTimeStr);
-        };
+  const toDateTime = (dateStr, timeStr) => {
+    if (!dateStr) return null;
+    return new Date(`${dateStr}T${timeStr || "00:00"}:00`);
+  };
 
-        switch (sortOrder) {
-            case 'timestamp_asc':
-                return (a.timestamp ? a.timestamp.toDate() : 0) - (b.timestamp ? b.timestamp.toDate() : 0);
-            case 'timestamp_desc':
-                return (b.timestamp ? b.timestamp.toDate() : 0) - (a.timestamp ? a.timestamp.toDate() : 0);
-            case 'dueDate_asc':
-                const dateA = createDateTime(a.dueDate, a.dueTime) || new Date('9999-12-31T23:59:59');
-                const dateB = createDateTime(b.dueDate, b.dueTime) || new Date('9999-12-31T23:59:59');
-                return dateA.getTime() - dateB.getTime();
-            case 'dueDate_desc':
-                const dateADesc = createDateTime(a.dueDate, a.dueTime) || new Date('0000-01-01T00:00:00');
-                const dateBDesc = createDateTime(b.dueDate, b.dueTime) || new Date('0000-01-01T00:00:00');
-                return dateBDesc.getTime() - dateADesc.getTime();
-            case 'text_asc':
-                return a.text.localeCompare(b.text);
-            case 'text_desc':
-                return b.text.localeCompare(a.text);
-            default:
-                return 0;
-        }
-    });
+  return [...tasks].sort((a, b) => {
+    switch (sortOrder) {
+      case "timestamp_asc":
+        return (a.timestamp?.toDate() ?? 0) - (b.timestamp?.toDate() ?? 0);
+      case "timestamp_desc":
+        return (b.timestamp?.toDate() ?? 0) - (a.timestamp?.toDate() ?? 0);
+      case "dueDate_asc": {
+        const dA = toDateTime(a.dueDate, a.dueTime) ?? new Date("9999-12-31");
+        const dB = toDateTime(b.dueDate, b.dueTime) ?? new Date("9999-12-31");
+        return dA - dB;
+      }
+      case "dueDate_desc": {
+        const dA = toDateTime(a.dueDate, a.dueTime) ?? new Date("0001-01-01");
+        const dB = toDateTime(b.dueDate, b.dueTime) ?? new Date("0001-01-01");
+        return dB - dA;
+      }
+      case "text_asc":  return a.text.localeCompare(b.text);
+      case "text_desc": return b.text.localeCompare(a.text);
+      default:          return 0;
+    }
+  });
 }
+
+/* ------------------------------------------------------------------
+   UI helpers: task count badge & empty state
+   ------------------------------------------------------------------ */
+
+function updateTaskCount(count) {
+  if (!taskCountBadge) return;
+  taskCountBadge.textContent = String(count);
+  taskCountBadge.classList.toggle("hidden", count === 0);
+}
+
+function toggleEmptyState(show) {
+  if (!emptyState) return;
+  emptyState.classList.toggle("hidden", !show);
+}
+
+/* ==================================================================
+   DISPLAY A TASK ITEM
+   ================================================================== */
 
 function displayTask(task) {
-    const listItem = document.createElement('li');
-    listItem.dataset.id = task.id;
-    listItem.draggable = true;
-    listItem.classList.add('task-item');
+  const li = document.createElement("li");
+  li.dataset.id  = task.id;
+  li.draggable   = true;
+  li.classList.add("task-item");
+  li.setAttribute("role", "listitem");
 
-    listItem.addEventListener('dragstart', (e) => {
-        draggedItem = listItem;
-        e.dataTransfer.effectAllowed = 'move';
-        setTimeout(() => listItem.classList.add('dragging'), 0);
+  /* ---------- Drag-and-drop ---------- */
+  li.addEventListener("dragstart", (e) => {
+    draggedItem = li;
+    e.dataTransfer.effectAllowed = "move";
+    setTimeout(() => li.classList.add("dragging"), 0);
+  });
+
+  li.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    const mid = li.getBoundingClientRect().y + li.getBoundingClientRect().height / 2;
+    li.style.borderTop    = e.clientY < mid ? "2px solid var(--primary)" : "none";
+    li.style.borderBottom = e.clientY < mid ? "none" : "2px solid var(--primary)";
+  });
+
+  li.addEventListener("dragleave", () => {
+    li.style.borderTop = li.style.borderBottom = "none";
+  });
+
+  li.addEventListener("drop", (e) => {
+    e.preventDefault();
+    li.style.borderTop = li.style.borderBottom = "none";
+    if (draggedItem && draggedItem !== li) {
+      const mid = li.getBoundingClientRect().y + li.getBoundingClientRect().height / 2;
+      taskList.insertBefore(draggedItem, e.clientY < mid ? li : li.nextSibling);
+      updateTaskOrder();
+    }
+  });
+
+  li.addEventListener("dragend", () => {
+    draggedItem?.classList.remove("dragging");
+    draggedItem = null;
+    Array.from(taskList.children).forEach((item) => {
+      item.style.borderTop = item.style.borderBottom = "none";
     });
+  });
 
-    listItem.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        const boundingBox = listItem.getBoundingClientRect();
-        const offset = boundingBox.y + (boundingBox.height / 2);
+  /* ---------- Task text (editable) ---------- */
+  const taskContentDiv = document.createElement("div");
+  taskContentDiv.classList.add("task-content");
 
-        // Get the computed primary color for the border to match theme
-        // We can't use 'var(--primary)' directly in JS logic easily without fetching it
-        // But we can set the style using the variable string!
-        const accentColor = 'var(--primary)';
+  const taskTextSpan = document.createElement("span");
+  taskTextSpan.textContent    = task.text;
+  taskTextSpan.classList.add("task-text");
+  taskTextSpan.contentEditable = "true";
+  taskTextSpan.spellcheck      = false;
+  taskTextSpan.setAttribute("role", "textbox");
+  taskTextSpan.setAttribute("aria-label", `Task: ${task.text}`);
+  taskTextSpan.setAttribute(
+    "aria-description",
+    "Click to toggle completion. Edit text inline then press Enter or click away to save."
+  );
 
-        if (e.clientY < offset) {
-            listItem.style.borderTop = '2px solid ' + accentColor;
-            listItem.style.borderBottom = 'none';
-        } else {
-            listItem.style.borderBottom = '2px solid ' + accentColor;
-            listItem.style.borderTop = 'none';
-        }
-    });
+  if (task.completed) taskTextSpan.classList.add("completed");
 
-    listItem.addEventListener('dragleave', () => {
-        listItem.style.borderTop = 'none';
-        listItem.style.borderBottom = 'none';
-    });
+  taskTextSpan.addEventListener("blur", () =>
+    updateTaskText(task.id, taskTextSpan.textContent.trim())
+  );
+  taskTextSpan.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); taskTextSpan.blur(); }
+  });
+  taskTextSpan.addEventListener("click", () =>
+    toggleTaskCompletion(task.id, !task.completed)
+  );
 
-    listItem.addEventListener('drop', (e) => {
-        e.preventDefault();
-        listItem.style.borderTop = 'none';
-        listItem.style.borderBottom = 'none';
+  /* ---------- Meta row (due date, category) ---------- */
+  const metaDiv = document.createElement("div");
+  metaDiv.classList.add("task-meta");
 
-        if (draggedItem && draggedItem !== listItem) {
-            const boundingBox = listItem.getBoundingClientRect();
-            const offset = boundingBox.y + (boundingBox.height / 2);
+  if (task.dueDate) {
+    const dueDateSpan  = document.createElement("span");
+    dueDateSpan.classList.add("task-due-date");
 
-            if (e.clientY < offset) {
-                taskList.insertBefore(draggedItem, listItem);
-            } else {
-                taskList.insertBefore(draggedItem, listItem.nextSibling);
-            }
-            updateTaskOrder();
-        }
-    });
+    const fullDueDate = new Date(`${task.dueDate}T${task.dueTime || "00:00"}:00`);
+    const today       = new Date(); today.setHours(0, 0, 0, 0);
 
-    listItem.addEventListener('dragend', () => {
-        draggedItem.classList.remove('dragging');
-        draggedItem = null;
-        Array.from(taskList.children).forEach(item => {
-            item.style.borderTop = 'none';
-            item.style.borderBottom = 'none';
-        });
-    });
-
-    const mainContentDiv = document.createElement('div');
-    mainContentDiv.classList.add('task-content');
-
-    const taskTextSpan = document.createElement('span');
-    taskTextSpan.textContent = task.text;
-    taskTextSpan.classList.add('task-text');
-    taskTextSpan.contentEditable = true;
-    taskTextSpan.spellcheck = false;
-
-    if (task.completed) {
-        taskTextSpan.classList.add('completed');
+    if (!task.completed) {
+      if (fullDueDate.toDateString() === today.toDateString()) {
+        dueDateSpan.classList.add("text-due-today");
+      } else if (fullDueDate < today) {
+        dueDateSpan.classList.add("text-danger");
+      }
     }
 
-    taskTextSpan.addEventListener('blur', () => updateTaskText(task.id, taskTextSpan.textContent.trim()));
-    taskTextSpan.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            taskTextSpan.blur();
-        }
-    });
-    taskTextSpan.addEventListener('click', () => toggleTaskCompletion(task.id, !task.completed));
+    const timeStr = task.dueTime
+      ? fullDueDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      : "";
+    dueDateSpan.textContent = `Due: ${fullDueDate.toLocaleDateString()}${timeStr ? " " + timeStr : ""}`;
+    metaDiv.appendChild(dueDateSpan);
+  }
 
-    const metaInfoDiv = document.createElement('div');
-    metaInfoDiv.classList.add('task-meta');
+  if (task.category?.trim()) {
+    const categorySpan = document.createElement("span");
+    categorySpan.classList.add("category-tag");
+    categorySpan.textContent = task.category.trim();
+    metaDiv.appendChild(categorySpan);
+  }
 
-    if (task.dueDate) {
-        const dueDateSpan = document.createElement('span');
-        const fullDueDate = new Date(`${task.dueDate}T${task.dueTime || '00:00'}:00`);
-        const today = new Date();
-        today.setHours(0,0,0,0);
+  taskContentDiv.appendChild(taskTextSpan);
+  taskContentDiv.appendChild(metaDiv);
 
-        let dateClass = '';
-        if (fullDueDate.toDateString() === today.toDateString() && !task.completed) {
-            dateClass = 'text-due-today';
-        } else if (fullDueDate < today && !task.completed) {
-            dateClass = 'text-danger';
-        }
-        if (dateClass) dueDateSpan.classList.add(dateClass);
+  /* ---------- Actions (delete) ---------- */
+  const actionsDiv  = document.createElement("div");
+  actionsDiv.classList.add("task-actions");
 
-        dueDateSpan.textContent = `Due: ${fullDueDate.toLocaleDateString()} ${task.dueTime ? fullDueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}`;
-        metaInfoDiv.appendChild(dueDateSpan);
-    }
+  const deleteBtn = document.createElement("button");
+  deleteBtn.type  = "button";
+  deleteBtn.classList.add("btn-delete");
+  deleteBtn.title             = "Delete task";
+  deleteBtn.setAttribute("aria-label", `Delete task: ${task.text}`);
+  deleteBtn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="3 6 5 6 21 6"/>
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+      <path d="M10 11v6m4-6v6"/>
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+    </svg>
+  `;
+  deleteBtn.addEventListener("click", () => deleteTask(task.id));
 
-    if (task.category && task.category.trim() !== '') {
-        const categorySpan = document.createElement('span');
-        categorySpan.classList.add('category-tag');
-        categorySpan.textContent = task.category;
-        metaInfoDiv.appendChild(categorySpan);
-    }
-
-    mainContentDiv.appendChild(taskTextSpan);
-    mainContentDiv.appendChild(metaInfoDiv);
-
-    const actionsDiv = document.createElement('div');
-    actionsDiv.classList.add('task-actions');
-
-    const deleteBtn = document.createElement('button');
-    deleteBtn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-        </svg>
-    `;
-    deleteBtn.classList.add('btn-delete');
-    deleteBtn.title = "Delete Task";
-    deleteBtn.addEventListener('click', () => deleteTask(task.id));
-
-    actionsDiv.appendChild(deleteBtn);
-    listItem.appendChild(mainContentDiv);
-    listItem.appendChild(actionsDiv);
-    taskList.appendChild(listItem);
+  actionsDiv.appendChild(deleteBtn);
+  li.appendChild(taskContentDiv);
+  li.appendChild(actionsDiv);
+  taskList.appendChild(li);
 }
 
-async function updateTaskOrder() {
-    if (!db || !userId || !isAuthReady) {
-        showMessageBox("Please log in to reorder tasks.");
-        return;
-    }
-
-    const listItems = Array.from(taskList.children);
-    const batch = db.batch();
-
-    for (let i = 0; i < listItems.length; i++) {
-        const taskId = listItems[i].dataset.id;
-        const taskRef = doc(db, `artifacts/${appId}/users/${userId}/tasks`, taskId);
-        batch.update(taskRef, { order: i });
-    }
-
-    try {
-        await batch.commit();
-        console.log("Task order updated successfully.");
-    } catch (error) {
-        console.error("Error updating task order:", error);
-        showMessageBox("Failed to reorder tasks. Please try again.");
-    }
-}
+/* ==================================================================
+   FIRESTORE TASK OPERATIONS
+   ================================================================== */
 
 async function addTaskToFirestore(text, dueDate = null, dueTime = null, category = null) {
-    if (!db || !userId || !isAuthReady) {
-        showMessageBox("Please log in to add tasks.");
-        return;
-    }
-    if (text.trim() === '') {
-        showMessageBox("Task cannot be empty!");
-        return;
-    }
-    try {
-        const currentTasksSnapshot = await getDocs(collection(db, `artifacts/${appId}/users/${userId}/tasks`));
-        const newOrder = currentTasksSnapshot.size;
-
-        await addDoc(collection(db, `artifacts/${appId}/users/${userId}/tasks`), {
-            text: text,
-            completed: false,
-            timestamp: new Date(),
-            dueDate: dueDate,
-            dueTime: dueTime,
-            category: category,
-            order: newOrder
-        });
-        taskInput.value = '';
-        dueDateInput.value = '';
-        dueTimeInput.value = '';
-        categoryInput.value = '';
-    } catch (e) {
-        console.error("Error adding document: ", e);
-        showMessageBox("Failed to add task. Please try again.");
-    }
+  if (!db || !userId || !isAuthReady) {
+    showMessageBox("Please log in to add tasks."); return;
+  }
+  if (!text.trim()) {
+    showMessageBox("Task cannot be empty!"); return;
+  }
+  try {
+    const snapshot = await getDocs(
+      collection(db, `artifacts/${appId}/users/${userId}/tasks`)
+    );
+    await addDoc(collection(db, `artifacts/${appId}/users/${userId}/tasks`), {
+      text:      text.trim(),
+      completed: false,
+      timestamp: new Date(),
+      dueDate:   dueDate   || null,
+      dueTime:   dueTime   || null,
+      category:  category  || null,
+      order:     snapshot.size,
+    });
+    taskInput.value    = "";
+    dueDateInput.value = "";
+    dueTimeInput.value = "";
+    categoryInput.value = "";
+    taskInput.focus();
+  } catch (e) {
+    console.error("Error adding task:", e);
+    showMessageBox("Failed to add task. Please try again.");
+  }
 }
 
 async function updateTaskText(id, newText) {
-    if (!db || !userId || !isAuthReady) {
-        showMessageBox("Please log in to edit tasks.");
-        return;
-    }
-    if (newText.trim() === '') {
-        showMessageBox("Task text cannot be empty! Reverting to previous text.");
-        setupRealtimeListener();
-        return;
-    }
-    try {
-        const taskRef = doc(db, `artifacts/${appId}/users/${userId}/tasks`, id);
-        await updateDoc(taskRef, {
-            text: newText
-        });
-    } catch (e) {
-        console.error("Error updating task text: ", e);
-        showMessageBox("Failed to update task text. Please try again.");
-    }
+  if (!db || !userId || !isAuthReady) {
+    showMessageBox("Please log in to edit tasks."); return;
+  }
+  if (!newText.trim()) {
+    showMessageBox("Task text cannot be empty! Reverting.");
+    setupRealtimeListener(); return;
+  }
+  try {
+    await updateDoc(
+      doc(db, `artifacts/${appId}/users/${userId}/tasks`, id),
+      { text: newText.trim() }
+    );
+  } catch (e) {
+    console.error("Error updating task text:", e);
+    showMessageBox("Failed to update task text. Please try again.");
+  }
 }
 
 async function toggleTaskCompletion(id, completed) {
-    if (!db || !userId || !isAuthReady) {
-        showMessageBox("Please log in to update tasks.");
-        return;
-    }
-    try {
-        const taskRef = doc(db, `artifacts/${appId}/users/${userId}/tasks`, id);
-        await updateDoc(taskRef, {
-            completed: completed
-        });
-    } catch (e) {
-        console.error("Error updating document: ", e);
-        showMessageBox("Failed to update task status. Please try again.");
-    }
+  if (!db || !userId || !isAuthReady) {
+    showMessageBox("Please log in to update tasks."); return;
+  }
+  try {
+    await updateDoc(
+      doc(db, `artifacts/${appId}/users/${userId}/tasks`, id),
+      { completed }
+    );
+  } catch (e) {
+    console.error("Error toggling completion:", e);
+    showMessageBox("Failed to update task status. Please try again.");
+  }
 }
 
 async function deleteTask(id) {
-    if (!db || !userId || !isAuthReady) {
-        showMessageBox("Please log in to delete tasks.");
-        return;
-    }
-    try {
-        await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/tasks`, id));
-    } catch (e) {
-        console.error("Error deleting document: ", e);
-        showMessageBox("Failed to delete task. Please try again.");
-    }
+  if (!db || !userId || !isAuthReady) {
+    showMessageBox("Please log in to delete tasks."); return;
+  }
+  try {
+    await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/tasks`, id));
+  } catch (e) {
+    console.error("Error deleting task:", e);
+    showMessageBox("Failed to delete task. Please try again.");
+  }
 }
 
+/** Persist the current visual order of tasks to Firestore. */
+async function updateTaskOrder() {
+  if (!db || !userId || !isAuthReady) {
+    showMessageBox("Please log in to reorder tasks."); return;
+  }
+  const items  = Array.from(taskList.children);
+  const batch  = writeBatch(db); // ← v9 modular batch
+
+  items.forEach((item, index) => {
+    const taskRef = doc(db, `artifacts/${appId}/users/${userId}/tasks`, item.dataset.id);
+    batch.update(taskRef, { order: index });
+  });
+
+  try {
+    await batch.commit();
+    console.log("Task order updated.");
+  } catch (error) {
+    console.error("Error updating task order:", error);
+    showMessageBox("Failed to reorder tasks. Please try again.");
+  }
+}
+
+/* ==================================================================
+   AUTH OPERATIONS
+   ================================================================== */
+
 async function handleSignUp() {
-    const email = emailInput.value;
-    const password = passwordInput.value;
+  const email    = emailInput.value.trim();
+  const password = passwordInput.value;
 
-    if (!email || !password) {
-        showMessageBox("Please enter both email and password.");
-        return;
-    }
-
-    try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await sendEmailVerification(userCredential.user);
-        showMessageBox("Account created! A verification email has been sent to your address. Please verify your email to ensure full functionality.");
-    } catch (error) {
-        console.error("Error signing up:", error);
-        let errorMessage = "Failed to create account.";
-        switch (error.code) {
-            case 'auth/email-already-in-use':
-                errorMessage = "This email is already in use. Try logging in.";
-                break;
-            case 'auth/invalid-email':
-                errorMessage = "Invalid email address.";
-                break;
-            case 'auth/weak-password':
-                errorMessage = "Password should be at least 6 characters.";
-                break;
-            default:
-                errorMessage = `Error: ${error.message}`;
-        }
-        showMessageBox(errorMessage);
-    }
+  if (!email || !password) {
+    showMessageBox("Please enter both email and password."); return;
+  }
+  try {
+    const credential = await createUserWithEmailAndPassword(auth, email, password);
+    await sendEmailVerification(credential.user);
+    showMessageBox(
+      "Account created! A verification email has been sent. Please verify your address."
+    );
+  } catch (error) {
+    console.error("Sign-up error:", error);
+    const messages = {
+      "auth/email-already-in-use": "This email is already registered. Try logging in.",
+      "auth/invalid-email":        "Invalid email address.",
+      "auth/weak-password":        "Password must be at least 6 characters.",
+    };
+    showMessageBox(messages[error.code] ?? `Error: ${error.message}`);
+  }
 }
 
 async function handleLogin() {
-    const email = emailInput.value;
-    const password = passwordInput.value;
+  const email    = emailInput.value.trim();
+  const password = passwordInput.value;
 
-    if (!email || !password) {
-        showMessageBox("Please enter both email and password.");
-        return;
-    }
-
-    try {
-        await signInWithEmailAndPassword(auth, email, password);
-        showMessageBox("Logged in successfully!");
-    } catch (error) {
-        console.error("Error logging in:", error);
-        let errorMessage = "Invalid email or password.";
-        switch (error.code) {
-            case 'auth/invalid-credential':
-                errorMessage = "Invalid email or password.";
-                break;
-            case 'auth/invalid-email':
-                errorMessage = "Invalid email address format.";
-                break;
-            default:
-                errorMessage = `Error: ${error.message}`;
-        }
-        showMessageBox(errorMessage);
-    }
+  if (!email || !password) {
+    showMessageBox("Please enter both email and password."); return;
+  }
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    console.error("Login error:", error);
+    const messages = {
+      "auth/invalid-credential": "Invalid email or password.",
+      "auth/invalid-email":      "Invalid email address format.",
+    };
+    showMessageBox(messages[error.code] ?? `Error: ${error.message}`);
+  }
 }
 
 async function handleLogout() {
-    try {
-        await signOut(auth);
-        showMessageBox("Logged out successfully!");
-    } catch (error) {
-        console.error("Error logging out:", error);
-        showMessageBox("Failed to log out. Please try again.");
-    }
+  try {
+    await signOut(auth);
+    closeSettingsMenu();
+  } catch (error) {
+    console.error("Logout error:", error);
+    showMessageBox("Failed to log out. Please try again.");
+  }
 }
 
 async function handleForgotPassword() {
-    const email = emailInput.value;
-    if (!email) {
-        showMessageBox("Please enter your email address to reset your password.");
-        return;
-    }
-    try {
-        await sendPasswordResetEmail(auth, email);
-        showMessageBox(`Password reset email sent to ${email}. Please check your inbox.`);
-    } catch (error) {
-        console.error("Error sending password reset email:", error);
-        let errorMessage = "Failed to send password reset email.";
-        switch (error.code) {
-            case 'auth/invalid-email':
-                errorMessage = "Invalid email address.";
-                break;
-            case 'auth/user-not-found':
-                errorMessage = "No user found with that email address.";
-                break;
-            default:
-                errorMessage = `Error: ${error.message}`;
-        }
-        showMessageBox(errorMessage);
-    }
+  const email = emailInput.value.trim();
+  if (!email) {
+    showMessageBox("Enter your email address above first."); return;
+  }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    showMessageBox(`Password reset email sent to ${email}. Check your inbox.`);
+  } catch (error) {
+    console.error("Password reset error:", error);
+    const messages = {
+      "auth/invalid-email":  "Invalid email address.",
+      "auth/user-not-found": "No account found with that email.",
+    };
+    showMessageBox(messages[error.code] ?? `Error: ${error.message}`);
+  }
 }
 
 async function handleResendVerificationEmail() {
-    if (currentUser && !currentUser.emailVerified) {
-        try {
-            await sendEmailVerification(currentUser);
-            showMessageBox("Verification email re-sent! Please check your inbox.");
-        }
-        catch (error) {
-            console.error("Error resending verification email:", error);
-            showMessageBox("Failed to resend verification email. Please try again.");
-        }
-    } else {
-        showMessageBox("No unverified user logged in, or email already verified.");
+  if (currentUser && !currentUser.emailVerified) {
+    try {
+      await sendEmailVerification(currentUser);
+      showMessageBox("Verification email resent! Check your inbox.");
+    } catch (error) {
+      console.error("Resend verification error:", error);
+      showMessageBox("Failed to resend verification email. Please try again.");
     }
+  } else {
+    showMessageBox("No unverified user is logged in, or email is already verified.");
+  }
 }
 
-addTaskBtn.addEventListener('click', () => addTaskToFirestore(taskInput.value, dueDateInput.value, dueTimeInput.value, categoryInput.value.trim()));
+/* ==================================================================
+   EVENT LISTENERS
+   ================================================================== */
 
-taskInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        addTaskToFirestore(taskInput.value, dueDateInput.value, dueTimeInput.value, categoryInput.value.trim());
-    }
+// Task input actions
+addTaskBtn.addEventListener("click", () =>
+  addTaskToFirestore(
+    taskInput.value,
+    dueDateInput.value,
+    dueTimeInput.value,
+    categoryInput.value.trim()
+  )
+);
+
+taskInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    addTaskToFirestore(
+      taskInput.value,
+      dueDateInput.value,
+      dueTimeInput.value,
+      categoryInput.value.trim()
+    );
+  }
 });
 
-loginBtn.addEventListener('click', handleLogin);
-signupBtn.addEventListener('click', handleSignUp);
-forgotPasswordBtn.addEventListener('click', handleForgotPassword);
-resendVerificationBtn.addEventListener('click', handleResendVerificationEmail);
+// Auth form keyboard navigation
+emailInput.addEventListener("keypress",    (e) => { if (e.key === "Enter") passwordInput.focus(); });
+passwordInput.addEventListener("keypress", (e) => { if (e.key === "Enter") handleLogin(); });
 
-filterSelect.addEventListener('change', (e) => {
-    currentFilter = e.target.value;
-    setupRealtimeListener();
+// Auth buttons
+loginBtn.addEventListener("click",           handleLogin);
+signupBtn.addEventListener("click",          handleSignUp);
+forgotPasswordBtn.addEventListener("click",  handleForgotPassword);
+resendVerificationBtn.addEventListener("click", handleResendVerificationEmail);
+
+// Filter & sort
+filterSelect.addEventListener("change", (e) => { currentFilter = e.target.value; setupRealtimeListener(); });
+sortSelect.addEventListener("change",   (e) => { currentSort   = e.target.value; setupRealtimeListener(); });
+
+// Settings actions
+themeSelect.addEventListener("change",     (e) => setTheme(e.target.value));
+darkModeToggleBtn.addEventListener("click",    toggleDisplayMode);
+passwordChangeBtn.addEventListener("click",    handlePasswordChange);
+addProfileInfoBtn.addEventListener("click",    handleAddProfileInfo);
+exportDataBtn.addEventListener("click",        handleExportData);
+deleteAccountBtn.addEventListener("click",     handleDeleteAccount);
+logoutBtn.addEventListener("click",            handleLogout);
+
+openFiderBtn.addEventListener("click", () => {
+  window.open("https://echotasks.fider.io/", "_blank", "noopener,noreferrer");
+  closeSettingsMenu();
 });
 
-sortSelect.addEventListener('change', (e) => {
-    currentSort = e.target.value;
-    setupRealtimeListener();
-});
-
-emailInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        passwordInput.focus();
-    }
-});
-
-passwordInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        handleLogin();
-    }
-});
-
-settingsBtn.addEventListener('click', toggleSettingsMenu);
-
-// Update listeners for new controls
-themeSelect.addEventListener('change', (e) => setTheme(e.target.value));
-darkModeToggleBtn.addEventListener('click', toggleDisplayMode); // Changed from toggleDarkMode
-
-passwordChangeBtn.addEventListener('click', handlePasswordChange);
-deleteAccountBtn.addEventListener('click', handleDeleteAccount);
-addProfileInfoBtn.addEventListener('click', handleAddProfileInfo);
-exportDataBtn.addEventListener('click', handleExportData);
-openFiderBtn.addEventListener('click', () => {
-    window.open('https://echotasks.fider.io/', '_blank');
-    settingsMenu.classList.add('hidden');
-});
-logoutBtn.addEventListener('click', handleLogout);
-
-document.addEventListener('click', (event) => {
-    if (!settingsMenu.contains(event.target) && !settingsBtn.contains(event.target) && !settingsMenu.classList.contains('hidden')) {
-        settingsMenu.classList.add('hidden');
-    }
-});
-
-// Use new init function
+/* ==================================================================
+   STARTUP
+   ================================================================== */
 applySavedPreferences();
-
 window.onload = initializeFirebase;

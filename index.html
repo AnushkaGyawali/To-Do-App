@@ -1,24 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirecting to To-Do App...</title>
-    <!-- This meta tag will redirect the browser to todo_list.html after 0 seconds -->
-    <meta http-equiv="refresh" content="0; url=To-Do.html">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #f3f4f6;
-            color: #pink;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EchoTasks — Redirecting…</title>
+  <!-- Instant redirect to the main app -->
+  <meta http-equiv="refresh" content="0; url=To-Do.html">
+  <style>
+    *  { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background-color: #f4f7f5;
+      color: #1a3a2e;
+      gap: 0.75rem;
+    }
+    /* Spinner */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2.5px solid #c5dcd0;
+      border-top-color: #4caf82;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    p {
+      font-size: 0.95rem;
+      font-weight: 500;
+      opacity: 0.7;
+    }
+  </style>
 </head>
 <body>
-    <p>Redirecting to your To-Do List App...</p>
+  <div class="spinner" aria-hidden="true"></div>
+  <p>Opening EchoTasks…</p>
 </body>
 </html>
